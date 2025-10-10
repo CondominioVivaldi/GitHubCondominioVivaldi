@@ -1,0 +1,1 @@
+//Para funciones auxiliares futuras

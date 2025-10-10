@@ -1,0 +1,1 @@
+//Panel del administrador, no se si página de inicio u otra sección
