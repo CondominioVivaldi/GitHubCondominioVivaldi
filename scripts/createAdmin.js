@@ -1,6 +1,6 @@
 //Importa dotenv primero, ANTES de cualquier otro import
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 // Luego los demás imports
 import { connectToDatabase } from "../src/lib/mongodb.js";
