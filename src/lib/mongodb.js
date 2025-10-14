@@ -1,3 +1,30 @@
+/*import mongoose from "mongoose";
+
+let isConnected = false;
+
+export async function connectToDatabase() {
+  // Usa Atlas si existe, sino usa la base local
+  const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/condimino";
+
+  if (isConnected) {
+    console.log("🟢 Ya existe una conexión activa a MongoDB.");
+    return;
+  }
+
+  try {
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    isConnected = true;
+    console.log("✅ Conectado correctamente a MongoDB:", uri.includes("127.0.0.1") ? "LOCAL" : "ATLAS");
+  } catch (error) {
+    console.error("❌ Error al conectar con MongoDB:", error.message);
+    throw error;
+  }
+}
+*/
 import mongoose from "mongoose";
 
 let isConnected = false;

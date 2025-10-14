@@ -7,6 +7,9 @@ const UserSchema = new mongoose.Schema({
   correo: { type: String, required: true, unique: true },
   contraseña: { type: String, required: true },
   tipoUsuario: { type: String, enum: ["admin", "vivienda"], required: true },
+  resetToken: String,
+  resetTokenExp: Date,
+
 }, { timestamps: true });
 
 // Si el modelo ya fue creado (por recarga en desarrollo), reutilizarlo
