@@ -1,4 +1,4 @@
-//Modelo del usuario (mongoose)
+//Esquema Mongoose para usuarios
 
 import mongoose from "mongoose";
 

@@ -1,8 +1,7 @@
-//Importa dotenv primero, ANTES de cualquier otro import
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+// Crea un usuario administrador y lo agrega MongoDB
 
-// Luego los demás imports
+import dotenv from "dotenv"; //Importa dotenv primero
+dotenv.config({ path: ".env.local" });
 import { connectToDatabase } from "../src/lib/mongodb.js";
 import User from "../src/models/User.js";
 

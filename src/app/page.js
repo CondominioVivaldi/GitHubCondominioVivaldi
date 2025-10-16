@@ -1,3 +1,5 @@
+//Página principal de la aplicación
+
 export default function HomePage() {
   return (
     <main className="flex justify-center items-center h-screen">

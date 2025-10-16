@@ -1,3 +1,5 @@
+//Conexión a MongoDB usando Mongoose
+
 import mongoose from "mongoose";
 
 let isConnected = false;
