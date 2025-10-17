@@ -1,9 +1,10 @@
-//Página principal de la aplicación
-
-export default function HomePage() {
+// src/app/page.js
+export default function Home() {
   return (
-    <main className="flex justify-center items-center h-screen">
-      <h1 className="text-3xl font-bold text-blue-700">Condominio Vivaldi</h1>
+    <main className="w-screen h-screen overflow-hidden flex items-center justify-center bg-mi-gradiante-azul">
+      <div className="w-full h-full">
+        {/* Aquí se colocará el contenido principal del sistema */}
+      </div>
     </main>
-  )
+  );
 }
