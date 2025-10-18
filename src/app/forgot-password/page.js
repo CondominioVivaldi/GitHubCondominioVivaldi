@@ -40,9 +40,10 @@ export default function ForgotPasswordPage() {
           />
           <button
             type="submit"
-            className="w-full text-white py-2 rounded-lg transition 
-                       bg-gradient-to-b from-sky-400 to-blue-800 
-                       hover:from-sky-500 hover:to-blue-900"
+            className="w-full py-2 text-white font-semibold rounded-lg shadow-md
+             bg-gradient-to-b from-[#A2D4F4] to-[#003D8F]
+             hover:from-[#7EC3F2] hover:to-[#0050B5]
+             transition duration-300 ease-in-out"
           >
             Solicitar
           </button>

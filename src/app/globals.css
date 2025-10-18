@@ -1,26 +1,108 @@
+/* Estilos globales */
+
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Italianno&family=Rubik:wght@400;600&display=swap');
 
+/* Paleta de colores */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --Mi-blanco: #FFFFFF;
+  --Mi-cafe-oscuro: #333333;
+  --Mi-gris: #A6A6A6;
+
+  --Mi-gradiante-azul-from: #32379E;
+  --Mi-gradiante-azul-to: #1B263B;
+
+  --Mi-gradiante-blanco-from: #E0E1DD;
+  --Mi-gradiante-blanco-to: #FFFFFF;
+
+  --Mi-gradiente-boton-principal-from: #82C9F7;
+  --Mi-gradiente-boton-principal-to: #415A77;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Gradientes predefinidos */
+.bg-mi-gradiante-azul {
+  background: linear-gradient(90deg, var(--Mi-gradiante-azul-from) 0%, var(--Mi-gradiante-azul-to) 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.bg-mi-gradiante-blanco {
+  background: linear-gradient(90deg, var(--Mi-gradiante-blanco-from) 0%, var(--Mi-gradiante-blanco-to) 100%);
 }
 
+.bg-mi-gradiente-boton-principal {
+  background: linear-gradient(90deg, var(--Mi-gradiente-boton-principal-from) 0%, var(--Mi-gradiente-boton-principal-to) 100%);
+}
+
+.bg-fijo {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Tipografías y tamaños */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Rubik', sans-serif;
+  color: var(--Mi-cafe-oscuro);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.Mi_texto_logo {
+  font-family: 'Italianno', cursive;
+  font-weight: 400;
+  font-size: 48px;
+}
+
+.Mi_H1_64 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 64px;
+}
+
+.Mi_H2_40 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 40px;
+}
+
+.Mi_H3_32 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 32px;
+}
+
+.Mi_H4_24 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.Mi_texto_20 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.Mi_texto_negrita_20 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.Mi_texto_boton {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.Mi_texto_datos_de_contacto {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+}
+
+.Mi_texto_pequeño_16 {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
 }

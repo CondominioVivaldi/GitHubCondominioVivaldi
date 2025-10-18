@@ -29,34 +29,11 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* HEADER FIJO ARRIBA */}
-      <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
-          {/* Logo + Nombre */}
-          <div className="flex items-center space-x-3">
-            <img
-              src="/logo.png"
-              alt="Logo Condominio Vivaldi"
-              className="h-20 w-auto"
-            />
-            <span className="text-xl font-bold text-blue-900">
-              Condominio Vivaldi
-            </span>
-          </div>
-
-          {/* Contacto */}
-          <div className="text-sm text-gray-700 text-right">
-            <p>Número de oficina: 4120 - 4121</p>
-            <p>Correo: adm@condominiovivaldi.com</p>
-            <p>Dirección: 99a., 99-97, zona 9, Ciudad de Guatemala</p>
-          </div>
-        </div>
-      </header>
 
       {/* CONTENIDO DE LOGIN */}
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-4 pt-40">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-6">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          <h1 className="text-5xl font-bold text-center text-gray-800 mb-6">
             Inicio de Sesión
           </h1>
 
@@ -98,13 +75,14 @@ export default function LoginPage() {
             </div>
 
             <button
-              type="submit"
-              className="w-full text-white py-2 rounded-lg transition 
-                         bg-gradient-to-b from-sky-200 to-blue-800 
-                         hover:from-sky-500 hover:to-blue-600"
-            >
-              Iniciar Sesión
-            </button>
+  type="submit"
+  className="w-full py-2 text-white font-semibold rounded-lg shadow-md
+             bg-gradient-to-b from-[#A2D4F4] to-[#003D8F]
+             hover:from-[#7EC3F2] hover:to-[#0050B5]
+             transition duration-300 ease-in-out"
+>
+  Iniciar Sesión
+</button>
           </form>
 
           {mensaje && (
@@ -118,7 +96,7 @@ export default function LoginPage() {
           )}
 
           <p className="mt-4 text-center text-sm hover:underline">
-  <Link href="/forgot-password" className="text-blue-600">
+  <Link href="/forgot-password" className="text-black">
     ¿Olvidaste tu contraseña?
   </Link>
 </p>

@@ -1,6 +1,6 @@
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-gradient-to-b from-sky-500 to-blue-800 text-white p-4">
+    <aside className="w-64 bg-gradient-to-b from-[#32379E] to-[#1B263B] text-white p-4 shadow-lg">
       <nav className="space-y-2">
         <a href="/inicio" className="block py-2 px-3 hover:bg-blue-700 rounded">Inicio</a>
         <details>
@@ -14,15 +14,16 @@ export default function Sidebar() {
           </div>
         </details>
         <details>
-          <summary className="cursor-pointer py-2 px-3 hover:bg-blue-700 rounded">
-            Amenidades
-          </summary>
-          <div className="ml-4">
-            <a href="/amenidades/agregar" className="block py-1">Agregar</a>
-            <a href="/amenidades/editar" className="block py-1">Editar</a>
-            <a href="/amenidades/eliminar" className="block py-1">Eliminar</a>
-          </div>
-        </details>
+  <summary className="cursor-pointer py-2 px-3 hover:bg-blue-700 rounded">
+    Amenidades
+  </summary>
+  <div className="ml-4">
+    <a href="/amenidades" className="block py-1">Ver amenidades</a>
+    <a href="/amenidades/agregar" className="block py-1">Agregar</a>
+    <a href="/amenidades/editar" className="block py-1">Editar</a>
+    <a href="/amenidades/eliminar" className="block py-1">Eliminar</a>
+  </div>
+</details>
         <a href="/reservas" className="block py-2 px-3 hover:bg-blue-700 rounded">Reservas</a>
         <a href="/reclamos" className="block py-2 px-3 hover:bg-blue-700 rounded">Reclamos</a>
         <a href="/condominos" className="block py-2 px-3 hover:bg-blue-700 rounded">Condóminos</a>
