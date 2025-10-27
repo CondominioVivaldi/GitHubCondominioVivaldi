@@ -1,6 +1,8 @@
+// src/app/usuarioAdministrador/condominos/agregar/page.jsx
+
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function AgregarCondomino() {
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -147,11 +149,11 @@ export default function AgregarCondomino() {
               value={tipoDocumento}
               onChange={(e) => setTipoDocumento(e.target.value)}
             >
-              <option value="" disabled>
+              <option value="" disabled className="text-[var(--Mi-gris)]">
                 Seleccione una opción:
               </option>
-              <option value="DPI">DPI</option>
-              <option value="Pasaporte">Pasaporte</option>
+              <option value="DPI" className="text-[var(--Mi-cafe-oscuro)]">DPI</option>
+              <option value="Pasaporte" className="text-[var(--Mi-cafe-oscuro)]">Pasaporte</option>
             </select>
             {errors.tipoDocumento && (
               <span className="text-red-500 text-sm mt-1">
