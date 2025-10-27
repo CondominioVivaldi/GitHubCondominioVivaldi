@@ -1,6 +1,8 @@
+// src/app/usuarioAdministrador/condominos/agregar/page.jsx
+
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function AgregarCondomino() {
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -19,6 +21,11 @@ export default function AgregarCondomino() {
     tipoDocumento === ""
       ? "text-[var(--Mi-gris)]"
       : "text-[var(--Mi-cafe-oscuro)]";
+
+  const fechaTextColor = (valorFecha) =>
+  valorFecha === ""
+    ? "text-[var(--Mi-gris)]"
+    : "text-[var(--Mi-cafe-oscuro)]";
 
   const validateForm = () => {
     const newErrors = {};
@@ -147,11 +154,11 @@ export default function AgregarCondomino() {
               value={tipoDocumento}
               onChange={(e) => setTipoDocumento(e.target.value)}
             >
-              <option value="" disabled>
+              <option value="" disabled className="text-[var(--Mi-gris)]">
                 Seleccione una opción:
               </option>
-              <option value="DPI">DPI</option>
-              <option value="Pasaporte">Pasaporte</option>
+              <option value="DPI" className="text-[var(--Mi-cafe-oscuro)]">DPI</option>
+              <option value="Pasaporte" className="text-[var(--Mi-cafe-oscuro)]">Pasaporte</option>
             </select>
             {errors.tipoDocumento && (
               <span className="text-red-500 text-sm mt-1">
@@ -207,7 +214,7 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaNacimiento}
               onChange={(e) => setFechaNacimiento(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaNacimiento ? "border-red-500" : ""}`}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaNacimiento)} ${errors.fechaNacimiento ? "border-red-500" : ""}`}
             />
             {errors.fechaNacimiento && (
               <span className="text-red-500 text-sm mt-1">
@@ -261,7 +268,7 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaEntrada}
               onChange={(e) => setFechaEntrada(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaEntrada ? "border-red-500" : ""}`}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaEntrada)} ${errors.fechaEntrada ? "border-red-500" : ""}`}
             />
             {errors.fechaEntrada && (
               <span className="text-red-500 text-sm mt-1">
@@ -279,7 +286,7 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaSalida}
               onChange={(e) => setFechaSalida(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaSalida ? "border-red-500" : ""}`}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaSalida)} ${errors.fechaSalida ? "border-red-500" : ""}`}
             />
             {errors.fechaSalida && (
               <span className="text-red-500 text-sm mt-1">
@@ -300,7 +307,7 @@ export default function AgregarCondomino() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-full shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-xl shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
             >
               {isSubmitting ? "Guardando..." : "Guardar"}
             </button>
