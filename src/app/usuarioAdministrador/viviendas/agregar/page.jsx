@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -141,7 +142,7 @@ export default function AgregarVivienda() {
             <input
               id="idVivienda"
               type="text"
-              placeholder="Vivienda304"
+              placeholder="Escribir"
               value={idVivienda}
               onChange={(e) => setIdVivienda(e.target.value)}
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.idVivienda ? "border-red-500" : ""}`}
@@ -163,7 +164,7 @@ export default function AgregarVivienda() {
             <input
               id="direccion"
               type="text"
-              placeholder="4a av 4-58 zona 4"
+              placeholder="Escribir"
               value={direccion}
               onChange={(e) => setDireccion(e.target.value)}
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.direccion ? "border-red-500" : ""}`}
@@ -185,7 +186,7 @@ export default function AgregarVivienda() {
             <input
               id="modeloCasa"
               type="text"
-              placeholder="Premium"
+              placeholder="Escribir"
               value={modeloCasa}
               onChange={(e) => setModeloCasa(e.target.value)}
               className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
@@ -203,7 +204,7 @@ export default function AgregarVivienda() {
               id="cantidadPersonas"
               type="number"
               min="1"
-              placeholder="1"
+              placeholder="Escribir"
               value={cantidadPersonas}
               onChange={(e) => setCantidadPersonas(e.target.value)}
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.cantidadPersonas ? "border-red-500" : ""}`}
@@ -220,20 +221,10 @@ export default function AgregarVivienda() {
               <h2 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)]">
                 Condóminos
               </h2>
-              <button
-                type="button"
-                onClick={addCondomino}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-              >
-                + Agregar
-              </button>
             </div>
 
             {condominosVinculados.map((vinculo, index) => (
-              <div
-                key={index}
-                className="border border-[var(--Mi-gris)] rounded-lg p-4 mb-4 relative"
-              >
+              <div key={index} className="p-4 mb-4 relative">
                 <button
                   type="button"
                   onClick={() => removeCondomino(index)}
@@ -299,11 +290,19 @@ export default function AgregarVivienda() {
             </div>
           )}
 
-          <div className="flex justify-center pt-6">
+          <div className="flex justify-end items-end pt-6 flex-col gap-8">
+            <button
+              type="button"
+              onClick={addCondomino}
+              className="bg-transparent text-black cursor-pointer w-full"
+            >
+              <span className="text-4xl relative top-1">⊕</span> Agregar otro
+              condómino
+            </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-full shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-fit px-6 py-2 sm:px-8 sm:py-3 rounded-lg shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
             >
               {isSubmitting ? "Guardando..." : "Guardar"}
             </button>
