@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function AgregarCondomino() {
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -17,19 +17,18 @@ export default function AgregarCondomino() {
   const [submitMessage, setSubmitMessage] = useState("");
   const [errors, setErrors] = useState({});
 
-  const selectTextColor =
-    tipoDocumento === ""
-      ? "text-[var(--Mi-gris)]"
-      : "text-[var(--Mi-cafe-oscuro)]";
+  // Estado para rastrear si un campo ha sido "tocado" (desenfocado)
+  const [touched, setTouched] = useState({});
 
-  const fechaTextColor = (valorFecha) =>
-  valorFecha === ""
-    ? "text-[var(--Mi-gris)]"
-    : "text-[var(--Mi-cafe-oscuro)]";
+  // Estado para rastrear la validez general del formulario
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  const validateForm = () => {
+  // Lógica de validación extraída a una función pura.
+  // Esta función solo calcula los errores, no actualiza el estado.
+  const getFormErrors = () => {
     const newErrors = {};
 
+    // --- Validación de campos requeridos ---
     if (!tipoDocumento)
       newErrors.tipoDocumento = "Tipo de documento es requerido";
     if (!numeroDocumento)
@@ -42,6 +41,7 @@ export default function AgregarCondomino() {
     if (!telefono) newErrors.telefono = "Número de teléfono es requerido";
     if (!fechaEntrada) newErrors.fechaEntrada = "Fecha de entrada es requerida";
 
+    // --- Validaciones específicas ---
     if (numeroDocumento) {
       const cleanDoc = numeroDocumento.replace(/\s+/g, "");
       if (tipoDocumento === "DPI" && !/^\d{13}$/.test(cleanDoc)) {
@@ -58,9 +58,12 @@ export default function AgregarCondomino() {
 
     if (fechaNacimiento) {
       const birthDate = new Date(fechaNacimiento);
-      if (birthDate >= new Date()) {
+      // Ajuste para permitir la fecha de hoy, pero no fechas futuras
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (birthDate > today) {
         newErrors.fechaNacimiento =
-          "La fecha de nacimiento debe ser anterior a hoy";
+          "La fecha de nacimiento no puede ser en el futuro";
       }
     }
 
@@ -73,9 +76,50 @@ export default function AgregarCondomino() {
       }
     }
 
+    return newErrors;
+  };
+
+  // useEffect que se ejecuta cada vez que cambia un campo del formulario.
+  // Su propósito es actualizar el estado 'isFormValid' para (des)habilitar el botón.
+  useEffect(() => {
+    const newErrors = getFormErrors();
+    setIsFormValid(Object.keys(newErrors).length === 0);
+  }, [
+    tipoDocumento,
+    numeroDocumento,
+    nombreCompleto,
+    fechaNacimiento,
+    correo,
+    telefono,
+    fechaEntrada,
+    fechaSalida,
+  ]);
+
+  // Función para validar y actualizar el estado de errores.
+  const validateAndSetErrors = () => {
+    const newErrors = getFormErrors();
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // Manejador para el evento 'onBlur' (cuando el usuario sale del campo)
+  const handleBlur = (e) => {
+    const { id } = e.target;
+    // Marca el campo como "tocado"
+    setTouched((prev) => ({ ...prev, [id]: true }));
+    // Valida el formulario para actualizar el error de este campo
+    validateAndSetErrors();
+  };
+
+  const selectTextColor =
+    tipoDocumento === ""
+      ? "text-[var(--Mi-gris)]"
+      : "text-[var(--Mi-cafe-oscuro)]";
+
+  const fechaTextColor = (valorFecha) =>
+    valorFecha === ""
+      ? "text-[var(--Mi-gris)]"
+      : "text-[var(--Mi-cafe-oscuro)]";
 
   const clearForm = () => {
     setTipoDocumento("");
@@ -87,12 +131,27 @@ export default function AgregarCondomino() {
     setFechaEntrada("");
     setFechaSalida("");
     setErrors({});
+    setTouched({});
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // Marcar todos los campos como 'touched' para mostrar
+    // todos los errores pendientes si el usuario intenta enviar
+    setTouched({
+      tipoDocumento: true,
+      numeroDocumento: true,
+      nombreCompleto: true,
+      fechaNacimiento: true,
+      correo: true,
+      telefono: true,
+      fechaEntrada: true,
+      fechaSalida: true,
+    });
+
+    // Llamar a la nueva función de validación
+    if (!validateAndSetErrors()) return;
 
     setIsSubmitting(true);
     setSubmitMessage("");
@@ -140,6 +199,7 @@ export default function AgregarCondomino() {
         <form
           className="flex flex-col space-y-5 Mi_texto_20"
           onSubmit={handleSubmit}
+          noValidate // Deshabilitar validación nativa del navegador
         >
           <div className="flex flex-col">
             <label
@@ -150,17 +210,27 @@ export default function AgregarCondomino() {
             </label>
             <select
               id="tipoDocumento"
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${selectTextColor} ${errors.tipoDocumento ? "border-red-500" : ""}`}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${selectTextColor} ${
+                // Comprobar error Y si fue tocado
+                errors.tipoDocumento && touched.tipoDocumento
+                  ? "border-red-500"
+                  : ""
+              }`}
               value={tipoDocumento}
               onChange={(e) => setTipoDocumento(e.target.value)}
+              onBlur={handleBlur} // Añadir manejador onBlur
             >
               <option value="" disabled className="text-[var(--Mi-gris)]">
                 Seleccione una opción:
               </option>
-              <option value="DPI" className="text-[var(--Mi-cafe-oscuro)]">DPI</option>
-              <option value="Pasaporte" className="text-[var(--Mi-cafe-oscuro)]">Pasaporte</option>
+              <option value="DPI" className="text-[var(--Mi-cafe-oscuro)]">
+                DPI
+              </option>
+              <option value="Pasaporte" className="text-[var(--Mi-cafe-oscuro)]">
+                Pasaporte
+              </option>
             </select>
-            {errors.tipoDocumento && (
+            {errors.tipoDocumento && touched.tipoDocumento && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.tipoDocumento}
               </span>
@@ -177,9 +247,14 @@ export default function AgregarCondomino() {
               placeholder="0000000000000"
               value={numeroDocumento}
               onChange={(e) => setNumeroDocumento(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.numeroDocumento ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+                errors.numeroDocumento && touched.numeroDocumento
+                  ? "border-red-500"
+                  : ""
+              }`}
             />
-            {errors.numeroDocumento && (
+            {errors.numeroDocumento && touched.numeroDocumento && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.numeroDocumento}
               </span>
@@ -196,9 +271,14 @@ export default function AgregarCondomino() {
               placeholder="Bruce Lee"
               value={nombreCompleto}
               onChange={(e) => setNombreCompleto(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.nombreCompleto ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+                errors.nombreCompleto && touched.nombreCompleto
+                  ? "border-red-500"
+                  : ""
+              }`}
             />
-            {errors.nombreCompleto && (
+            {errors.nombreCompleto && touched.nombreCompleto && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.nombreCompleto}
               </span>
@@ -214,9 +294,16 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaNacimiento}
               onChange={(e) => setFechaNacimiento(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaNacimiento)} ${errors.fechaNacimiento ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(
+                fechaNacimiento
+              )} ${
+                errors.fechaNacimiento && touched.fechaNacimiento
+                  ? "border-red-500"
+                  : ""
+              }`}
             />
-            {errors.fechaNacimiento && (
+            {errors.fechaNacimiento && touched.fechaNacimiento && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.fechaNacimiento}
               </span>
@@ -233,9 +320,12 @@ export default function AgregarCondomino() {
               placeholder="brucelee@yahoo.com"
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.correo ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+                errors.correo && touched.correo ? "border-red-500" : ""
+              }`}
             />
-            {errors.correo && (
+            {errors.correo && touched.correo && (
               <span className="text-red-500 text-sm mt-1">{errors.correo}</span>
             )}
           </div>
@@ -250,9 +340,12 @@ export default function AgregarCondomino() {
               placeholder="00000000"
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.telefono ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+                errors.telefono && touched.telefono ? "border-red-500" : ""
+              }`}
             />
-            {errors.telefono && (
+            {errors.telefono && touched.telefono && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.telefono}
               </span>
@@ -268,9 +361,16 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaEntrada}
               onChange={(e) => setFechaEntrada(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaEntrada)} ${errors.fechaEntrada ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(
+                fechaEntrada
+              )} ${
+                errors.fechaEntrada && touched.fechaEntrada
+                  ? "border-red-500"
+                  : ""
+              }`}
             />
-            {errors.fechaEntrada && (
+            {errors.fechaEntrada && touched.fechaEntrada && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.fechaEntrada}
               </span>
@@ -286,9 +386,16 @@ export default function AgregarCondomino() {
               type="date"
               value={fechaSalida}
               onChange={(e) => setFechaSalida(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(fechaSalida)} ${errors.fechaSalida ? "border-red-500" : ""}`}
+              onBlur={handleBlur}
+              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${fechaTextColor(
+                fechaSalida
+              )} ${
+                errors.fechaSalida && touched.fechaSalida
+                  ? "border-red-500"
+                  : ""
+              }`}
             />
-            {errors.fechaSalida && (
+            {errors.fechaSalida && touched.fechaSalida && (
               <span className="text-red-500 text-sm mt-1">
                 {errors.fechaSalida}
               </span>
@@ -297,7 +404,11 @@ export default function AgregarCondomino() {
 
           {submitMessage && (
             <div
-              className={`text-center p-3 rounded-lg ${submitMessage.includes("exitosamente") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+              className={`text-center p-3 rounded-lg ${
+                submitMessage.includes("exitosamente")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
             >
               {submitMessage}
             </div>
@@ -306,8 +417,14 @@ export default function AgregarCondomino() {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-xl shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              // Deshabilitar si el formulario NO es válido O si se está enviando
+              disabled={!isFormValid || isSubmitting}
+              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-xl shadow-md transition-opacity ${
+                // Aplicar estilos de deshabilitado si NO es válido O si se está enviando
+                !isFormValid || isSubmitting
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:opacity-90"
+              }`}
             >
               {isSubmitting ? "Guardando..." : "Guardar"}
             </button>
