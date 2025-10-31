@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/condominos/buscar/page.jsx
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -71,7 +73,7 @@ export default function BuscarCondominos() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
-      <div className="flex flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
+      <div className="flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
         <div className="bg-[var(--Mi-blanco)] w-[400px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in h-[162px]">
           <div className="flex flex-col">
             <label htmlFor="criterio" className="mb-1">
