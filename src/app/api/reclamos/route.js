@@ -6,13 +6,27 @@ export async function GET(req) {
   await conectarBaseDeDatos();
   const { searchParams } = new URL(req.url);
   const estado = searchParams.get("estado");
+  const creadoPor = searchParams.get("creadoPor"); //nuevo parámetro
 
-  const filtro = estado ? { estado } : {};
+  let filtro = {};
+
+  //Estado: pendientes = Sin leer + En proceso
+  if (estado === "pendientes") {
+    filtro.estado = { $in: ["Sin leer", "En proceso"] };
+  } else if (estado) {
+    filtro.estado = estado;
+  }
+
+  //Si viene el ID del usuario, filtramos por él
+  if (creadoPor) {
+    filtro.creadoPor = creadoPor;
+  }
+
   const reclamos = await Reclamo.find(filtro)
-    .populate("creadoPor", "usuario") // muestra datos del usuario
+    .populate("creadoPor", "usuario")
     .sort({ createdAt: -1 });
 
-  return NextResponse.json(reclamos);
+  return NextResponse.json({ success: true, reclamos });
 }
 
 export async function POST(req) {
@@ -28,15 +42,60 @@ export async function POST(req) {
   }
 
   try {
+    // 👇 Se crea con estado por defecto "Sin leer" (lo define tu modelo)
     const nuevo = await Reclamo.create({ titulo, descripcion, creadoPor });
     return NextResponse.json(
       { message: "Reclamo creado correctamente", reclamo: nuevo },
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Error al crear reclamo:", error);
+    console.error("Error al crear reclamo:", error);
     return NextResponse.json(
       { error: "Error interno al crear reclamo." },
+      { status: 500 }
+    );
+  }
+}
+
+// 👇 Nuevo: actualizar estado de un reclamo
+export async function PUT(req) {
+  await conectarBaseDeDatos();
+  const body = await req.json();
+  const { id, estado, respuestaAdmin } = body;
+
+  if (!id || !estado) {
+    return NextResponse.json(
+      { error: "ID y nuevo estado son obligatorios." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const actualizado = await Reclamo.findByIdAndUpdate(
+      id,
+      {
+        estado,
+        respuestaAdmin: respuestaAdmin || undefined,
+        fechaResolucion: estado === "Finalizado" ? new Date() : undefined,
+      },
+      { new: true }
+    );
+
+    if (!actualizado) {
+      return NextResponse.json(
+        { error: "Reclamo no encontrado." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Reclamo actualizado correctamente",
+      reclamo: actualizado,
+    });
+  } catch (error) {
+    console.error("Error al actualizar reclamo:", error);
+    return NextResponse.json(
+      { error: "Error interno al actualizar reclamo." },
       { status: 500 }
     );
   }
