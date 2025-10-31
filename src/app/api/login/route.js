@@ -44,6 +44,7 @@ export async function POST(req) {
       success: true,
       tipoUsuario: user.tipoUsuario, // 'administrador' o 'vivienda'
       usuario: user.usuario,
+      usuarioId: user._id.toString(), // Agregue esto para enviar el ID del usuario a reclamos
       message: "Inicio de sesión exitoso."
     });
 
