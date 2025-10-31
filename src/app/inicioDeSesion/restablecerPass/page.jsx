@@ -75,7 +75,7 @@ export default function RestablecerPass() {
           {/* Campo 1 */}
           <div className="flex flex-col text-left w-72">
             <label className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-1">
-              Ingrese nueva contraseña
+              Ingrese nueva contraseña:
             </label>
             <input
               type="password"
@@ -89,7 +89,7 @@ export default function RestablecerPass() {
           {/* Campo 2 */}
           <div className="flex flex-col text-left w-72">
             <label className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-1">
-              Repita nueva contraseña
+              Repita nueva contraseña:
             </label>
             <input
               type="password"
