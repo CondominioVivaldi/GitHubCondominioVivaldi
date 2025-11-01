@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 export default function ReclamosPendientes() {
   const [reclamos, setReclamos] = useState([]);
   const [seleccionado, setSeleccionado] = useState(null);
+  const [respuesta, setRespuesta] = useState("");
 
   useEffect(() => {
     const cargar = async () => {
@@ -14,6 +15,34 @@ export default function ReclamosPendientes() {
     };
     cargar();
   }, []);
+
+  const enviarRespuesta = async () => {
+    if (!seleccionado || !respuesta.trim()) return;
+
+    try {
+      const res = await fetch("/api/reclamos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: seleccionado._id,
+          estado: "En proceso",
+          mensaje: respuesta.trim(),
+          autor: "admin",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.reclamo) {
+        setSeleccionado(data.reclamo);
+        setRespuesta("");
+        setReclamos((prev) =>
+          prev.map((r) => (r._id === data.reclamo._id ? data.reclamo : r))
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error al enviar respuesta:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
@@ -33,7 +62,7 @@ export default function ReclamosPendientes() {
                 </tr>
               </thead>
               <tbody>
-                {reclamos.map((r, i) => (
+                {reclamos.map((r) => (
                   <tr
                     key={r._id}
                     className="bg-mi-gradiante-blanco text-[var(--Mi-cafe-oscuro)] Mi_texto_20 hover:bg-gray-50"
@@ -72,14 +101,12 @@ export default function ReclamosPendientes() {
       {/* 📌 Cuadros 2 y 3 en dos columnas */}
       {seleccionado && (
         <div className="w-full max-w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Columna izquierda: Asunto + Histórico */}
           <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 animate-fade-in">
             {/* Asunto */}
             <div>
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">
-                Asunto
-              </h3>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Asunto</h3>
               <input
                 type="text"
                 value={seleccionado.titulo}
@@ -90,19 +117,24 @@ export default function ReclamosPendientes() {
 
             {/* Histórico */}
             <div>
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">
-                Histórico de conversación
-              </h3>
-              <div className="Mi_texto_20 border border-gray-400 rounded-lg p-3 bg-gray-50 h-64 overflow-y-auto">
-                {seleccionado.descripcion ? (
-                  <div className="space-y-2">
-                    <p className="text-gray-600">
-                      {`Vivienda${seleccionado.vivienda?.numero || seleccionado.creadoPor?.usuario}, ${new Date(seleccionado.createdAt).toLocaleDateString("es-ES")}, ${new Date(seleccionado.createdAt).toLocaleTimeString("es-ES", { hour: '2-digit', minute: '2-digit' })}`}
-                    </p>
-                    <p>{seleccionado.descripcion}</p>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Histórico de conversación</h3>
+              <div className="Mi_texto_20 border border-gray-400 rounded-lg p-3 bg-gray-50 h-64 overflow-y-auto space-y-4">
+                <p className="text-gray-600">
+                  {`Vivienda ${seleccionado.vivienda?.numero ?? seleccionado.creadoPor?.usuario ?? "sin identificar"}, ${new Date(seleccionado.createdAt).toLocaleDateString("es-ES")}, ${new Date(seleccionado.createdAt).toLocaleTimeString("es-ES", { hour: '2-digit', minute: '2-digit' })}`}
+                </p>
+                <p>{seleccionado.descripcion}</p>
+
+                {Array.isArray(seleccionado.conversacion) && seleccionado.conversacion.length > 0 && (
+                  <div className="space-y-4">
+                    {seleccionado.conversacion.map((c, i) => (
+                      <div key={i} className="border-t border-gray-300 pt-2">
+                        <p className="text-gray-600">
+                          {c.autor === "admin" ? "Administrador" : "Usuario"} – {new Date(c.fecha).toLocaleString("es-ES")}
+                        </p>
+                        <p>{c.mensaje}</p>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <p className="text-gray-400">Sin detalles aún</p>
                 )}
               </div>
             </div>
@@ -111,15 +143,18 @@ export default function ReclamosPendientes() {
           {/* Columna derecha: Detalles con botón */}
           <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">
-                Detalles
-              </h3>
-              <button className="Mi_texto_20 bg-mi-gradiente-boton-principal Mi_texto_boton text-white px-4 py-2 rounded-lg shadow hover:opacity-90">
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">Detalles</h3>
+              <button
+                onClick={enviarRespuesta}
+                className="Mi_texto_20 bg-mi-gradiente-boton-principal Mi_texto_boton text-white px-4 py-2 rounded-lg shadow hover:opacity-90"
+              >
                 Enviar
               </button>
             </div>
             <textarea
               placeholder="Escribir..."
+              value={respuesta}
+              onChange={(e) => setRespuesta(e.target.value)}
               className="Mi_texto_20 w-full border border-gray-400 rounded-lg p-2 bg-gray-100 h-64 flex-1"
             />
           </div>

@@ -61,31 +61,32 @@ export async function POST(req) {
 export async function PUT(req) {
   await conectarBaseDeDatos();
   const body = await req.json();
-  const { id, estado, respuestaAdmin } = body;
+  const { id, estado, mensaje, autor } = body;
 
-  if (!id || !estado) {
-    return NextResponse.json(
-      { error: "ID y nuevo estado son obligatorios." },
-      { status: 400 }
-    );
+  if (!id) {
+    return NextResponse.json({ error: "El ID del reclamo es obligatorio." }, { status: 400 });
   }
+
+  const updateFields = {};
+  if (estado) updateFields.estado = estado;
+  if (estado === "Finalizado") updateFields.fechaResolucion = new Date();
 
   try {
     const actualizado = await Reclamo.findByIdAndUpdate(
       id,
       {
-        estado,
-        respuestaAdmin: respuestaAdmin || undefined,
-        fechaResolucion: estado === "Finalizado" ? new Date() : undefined,
+        $set: updateFields,
+        $push: mensaje && autor
+          ? { conversacion: { autor, mensaje, fecha: new Date() } }
+          : {},
       },
-      { new: true }
-    );
+      { new: true } // ✅ devuelve el documento actualizado
+    )
+      .populate("creadoPor", "usuario")
+      .populate("vivienda", "numero");
 
     if (!actualizado) {
-      return NextResponse.json(
-        { error: "Reclamo no encontrado." },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Reclamo no encontrado." }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -94,9 +95,6 @@ export async function PUT(req) {
     });
   } catch (error) {
     console.error("Error al actualizar reclamo:", error);
-    return NextResponse.json(
-      { error: "Error interno al actualizar reclamo." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error interno al actualizar reclamo." }, { status: 500 });
   }
 }
