@@ -54,7 +54,7 @@ export default function ReclamosPendientes() {
             <table className="border border-[var(--Mi-cafe-oscuro)] rounded-lg overflow-hidden w-full">
               <thead className="bg-mi-gradiante-azul text-[var(--Mi-blanco)] Mi_texto_negrita_20 text-center sticky top-0">
                 <tr>
-                  <th className="px-4 py-3">Acción</th>
+                  <th className="px-4 py-3">Ver</th>
                   <th className="px-4 py-3">Fecha</th>
                   <th className="px-4 py-3">Estado</th>
                   <th className="px-4 py-3">Asunto</th>
@@ -106,7 +106,7 @@ export default function ReclamosPendientes() {
           <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 animate-fade-in">
             {/* Asunto */}
             <div>
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Asunto</h3>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Asunto:</h3>
               <input
                 type="text"
                 value={seleccionado.titulo}
@@ -117,7 +117,7 @@ export default function ReclamosPendientes() {
 
             {/* Histórico */}
             <div>
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Histórico de conversación</h3>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Histórico de conversación:</h3>
               <div className="Mi_texto_20 border border-gray-400 rounded-lg p-3 bg-gray-50 h-64 overflow-y-auto space-y-4">
                 <p className="text-gray-600">
                   {`Vivienda ${seleccionado.vivienda?.numero ?? seleccionado.creadoPor?.usuario ?? "sin identificar"}, ${new Date(seleccionado.createdAt).toLocaleDateString("es-ES")}, ${new Date(seleccionado.createdAt).toLocaleTimeString("es-ES", { hour: '2-digit', minute: '2-digit' })}`}
@@ -143,7 +143,7 @@ export default function ReclamosPendientes() {
           {/* Columna derecha: Detalles con botón */}
           <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">Detalles</h3>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">Detalles:</h3>
               <button
                 onClick={enviarRespuesta}
                 className="Mi_texto_20 bg-mi-gradiente-boton-principal Mi_texto_boton text-white px-4 py-2 rounded-lg shadow hover:opacity-90"
