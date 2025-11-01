@@ -1,3 +1,4 @@
+// src/app/usuarioAdministrador/viviendas/agregar/page.jsx
 
 "use client";
 
@@ -90,18 +91,28 @@ export default function AgregarVivienda() {
     setSubmitMessage("");
 
     try {
+      // 🔍 Verificar primero si el ID ya existe
+      const check = await fetch(`/api/viviendas?idVivienda=${idVivienda}`);
+      if (check.ok) {
+        const exists = await check.json();
+        if (exists?.success && exists?.vivienda) {
+          setSubmitMessage("El ID de vivienda ya existe. Usa uno diferente.");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // ✅ Si no existe, crearla
       const response = await fetch("/api/viviendas", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idVivienda,
           direccion,
           modeloCasa: modeloCasa || null,
           cantidadPersonas,
           condominosVinculados: condominosVinculados.filter(
-            (c) => c.condominoId && c.tipoInquilino,
+            (c) => c.condominoId && c.tipoInquilino
           ),
         }),
       });
@@ -120,6 +131,7 @@ export default function AgregarVivienda() {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10">
