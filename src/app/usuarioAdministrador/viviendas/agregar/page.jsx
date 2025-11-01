@@ -181,7 +181,7 @@ export default function AgregarVivienda() {
               htmlFor="modeloCasa"
               className="mb-1 text-[var(--Mi-cafe-oscuro)]"
             >
-              Modelo:*
+              Modelo:
             </label>
             <input
               id="modeloCasa"
