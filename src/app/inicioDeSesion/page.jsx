@@ -36,6 +36,9 @@ export default function inicioDeSesion() {
         return;
       }
 
+      localStorage.setItem("usuarioId", data.usuarioId);   // Guardar ID del usuario para reclamos
+      localStorage.setItem("tipoUsuario", data.tipoUsuario); // Guardar tipo de usuario para reclamos
+
       console.log("Login exitoso. Tipo de usuario:", data.tipoUsuario);
 
       // Pausa pequeña para que la cookie se guarde
