@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/condominos/buscar/page.jsx
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -71,11 +73,8 @@ export default function BuscarCondominos() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
-      <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-col space-y-6 Mi_texto_20 text-[var(--Mi-cafe-oscuro)]"
-        >
+      <div className="flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
+        <div className="bg-[var(--Mi-blanco)] w-[400px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in h-[162px]">
           <div className="flex flex-col">
             <label htmlFor="criterio" className="mb-1">
               Buscar por:*
@@ -106,34 +105,29 @@ export default function BuscarCondominos() {
               </option>
             </select>
           </div>
+      </div>
 
-          <div className="flex flex-col">
-            <label htmlFor="busqueda" className="mb-1">
+      <div className="bg-[var(--Mi-blanco)] w-[400px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in h-[162px]">
+        <div className="flex flex-col">
+              <label htmlFor="busqueda" className="mb-1">
               Escribir ID / Nombre:*
             </label>
             <input
               id="busqueda"
               type="text"
               placeholder="Escribir..."
-              disabled={criterio === "Todos"}
+              disabled={criterio === "Todos" || criterio === ""}
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${inputTextColor}`}
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
+              onBlur={() => {
+                if (criterio && busqueda.trim() && criterio !== "Todos") {
+                  fetchCondominos(criterio, busqueda.trim());
+                }
+              }}
             />
           </div>
-
-          <div className="flex justify-center gap-4">
-            <button
-              type="submit"
-              disabled={!criterio || !busqueda.trim() || loading}
-              className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Buscando..." : "Buscar"}
-            </button>
-          </div>
-        </form>
       </div>
-
       {loading && (
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="flex justify-center items-center py-8">
@@ -144,7 +138,7 @@ export default function BuscarCondominos() {
           </div>
         </div>
       )}
-
+      </div>
       {!loading && hasSearched && condominos.length === 0 && (
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="text-center py-8">

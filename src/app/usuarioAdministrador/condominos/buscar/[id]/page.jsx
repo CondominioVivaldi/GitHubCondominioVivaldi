@@ -1,3 +1,6 @@
+// src/app/usuarioAdministrador/condominos/buscar/[id]/page.jsx
+// Resultado de la búsqueda de un condómino específico
+
 "use client";
 
 import { useParams } from "next/navigation";
