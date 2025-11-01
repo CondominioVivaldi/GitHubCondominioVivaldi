@@ -70,8 +70,8 @@ UsuarioSchema.methods.compararContraseña = async function(contraseña) {
   return await bcrypt.compare(contraseña, this.contraseña);
 };
 
-// Índice para búsquedas rápidas por usuario
-UsuarioSchema.index({ usuario: 1 });
+// Índice redundante porque ya existe unique
+// UsuarioSchema.index({ usuario: 1 });
 
 // Evitar duplicación del modelo en hot-reload
 export default mongoose.models.Usuario || mongoose.model("Usuario", UsuarioSchema);
