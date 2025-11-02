@@ -1,3 +1,5 @@
+// src/app/api/reclamos/route.js
+
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Reclamo from "@/modelos/Reclamo";
