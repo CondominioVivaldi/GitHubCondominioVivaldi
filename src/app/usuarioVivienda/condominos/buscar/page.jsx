@@ -2,87 +2,77 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
+// Pagina para que cargar los datos del condomino activo en los campos del formulario
 export default function BuscarCondominos() {
+  const router = useRouter();
   const [criterio, setCriterio] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [condominos, setCondominos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [tipoDocumento, setTipoDocumento] = useState("");
 
-  // Determina color de texto dinámico
   const selectTextColor =
     criterio === "" ? "text-[var(--Mi-gris)]" : "text-[var(--Mi-cafe-oscuro)]";
   const inputTextColor =
     busqueda === "" ? "text-[var(--Mi-gris)]" : "text-[var(--Mi-cafe-oscuro)]";
-
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
-      {/* Contenedor superior: búsqueda */}
-      <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
-        <form className="flex flex-col space-y-6 Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">
-          {/* Buscar por */}
+    <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10">
+      <div className="bg-[var(--Mi-blanco)] w-full max-w-2xl rounded-2xl shadow-2xl p-6 sm:p-8">
+        {/* Título */}
+        <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] mb-8 text-left">
+          Datos personales
+        </h1>
+        {/* Formulario */}
+        <form className="flex flex-col space-y-5 Mi_texto_20">
+          {/* Tipo de documento */}
           <div className="flex flex-col">
-            <label htmlFor="criterio" className="mb-1">
-              Buscar por:*
+            <label
+              htmlFor="tipoDocumento"
+              className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Tipo de documento:*
             </label>
             <select
-              id="criterio"
+              id="tipoDocumento"
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${selectTextColor}`}
-              value={criterio}
-              onChange={(e) => setCriterio(e.target.value)}
-            >
-              <option value="" disabled style={{ color: "var(--Mi-gris)" }}>
-                Elegir...
+              value={tipoDocumento}
+              onChange={(e) => setTipoDocumento(e.target.value)}>
+              <option value="" disabled>
+                Seleccione una opción:
               </option>
-              <option value="ID" style={{ color: "var(--Mi-cafe-oscuro)" }}>
-                ID
-              </option>
-              <option value="Nombre" style={{ color: "var(--Mi-cafe-oscuro)" }}>
-                Nombre
-              </option>
-              <option value="Todos" style={{ color: "var(--Mi-cafe-oscuro)" }}>
-                Todos
-              </option>
+              <option value="DPI">DPI</option>
+              <option value="Pasaporte">Pasaporte</option>
             </select>
           </div>
-
-          {/* Escribir ID / Nombre */}
+          {/* Número de documento */}
           <div className="flex flex-col">
-            <label htmlFor="busqueda" className="mb-1">
-              Escribir ID / Nombre:*
+            <label htmlFor="numeroDocumento" className="mb-1">
+              Número de documento:*
             </label>
             <input
-              id="busqueda"
+              id="numeroDocumento"
               type="text"
-              placeholder="Escribir..."
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${inputTextColor}`}
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="0000000000000"
+              className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
+            />
+          </div>
+          {/* Nombre completo */}
+          <div className="flex flex-col">
+            <label htmlFor="nombreCompleto" className="mb-1">
+              Nombre completo:*
+            </label>
+            <input
+              id="nombreCompleto"
+              type="text"
+              placeholder="Bruce Lee"
+              className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
           </div>
         </form>
-      </div>
-
-      {/* Contenedor inferior: tabla */}
-      <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
-        <table className="border border-[var(--Mi-cafe-oscuro)] rounded-lg overflow-hidden w-full">
-          <thead className=" bg-mi-gradiante-azul text-[var(--Mi-blanco)] Mi_texto_negrita_20 text-center">
-            <tr>
-              <th className="px-6 py-3">Nombre</th>
-              <th className="px-6 py-3">Número de documento</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...Array(5)].map((_, i) => (
-              <tr
-                key={i}
-                className="bg-mi-gradiante-blanco text-[var(--Mi-cafe-oscuro)] Mi_texto_20"
-              >
-                <td className="px-6 py-3">&nbsp;</td>
-                <td className="px-6 py-3">&nbsp;</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
