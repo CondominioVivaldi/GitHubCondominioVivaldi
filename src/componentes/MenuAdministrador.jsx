@@ -39,8 +39,8 @@ const ESTRUCTURA_MENU = [
       tipo: 'desplegable', 
       basePath: '/usuarioAdministrador/amenidades', 
       opciones: [
-        { titulo: "Ver", href: "/usuarioAdministrador/amenidades/ver" },
         { titulo: "Agregar", href: "/usuarioAdministrador/amenidades/agregar" },
+        { titulo: "Ver", href: "/usuarioAdministrador/amenidades/ver" },
         { titulo: "Editar", href: "/usuarioAdministrador/amenidades/editar" },
         { titulo: "Eliminar", href: "/usuarioAdministrador/amenidades/eliminar" }
       ] 

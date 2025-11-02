@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/amenidades/ver/page.jsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,11 +12,6 @@ export default function VerAmenidad() {
   const [loading, setLoading] = useState(true);
   const [currentIndexConReserva, setCurrentIndexConReserva] = useState(0);
   const [currentIndexSinReserva, setCurrentIndexSinReserva] = useState(0);
-
-  const getRandomImage = () => {
-    const images = ["/imagen1.jpg", "/imagen2.jpg", "/imagen3.jpg"];
-    return images[Math.floor(Math.random() * images.length)];
-  };
 
   useEffect(() => {
     fetchAmenidades();
@@ -41,11 +38,11 @@ export default function VerAmenidad() {
   const nextSlide = (type) => {
     if (type === "conReserva") {
       setCurrentIndexConReserva((prev) =>
-        prev === amenidades.conReserva.length - 1 ? 0 : prev + 1,
+        prev === amenidades.conReserva.length - 1 ? 0 : prev + 1
       );
     } else {
       setCurrentIndexSinReserva((prev) =>
-        prev === amenidades.sinReserva.length - 1 ? 0 : prev + 1,
+        prev === amenidades.sinReserva.length - 1 ? 0 : prev + 1
       );
     }
   };
@@ -53,11 +50,11 @@ export default function VerAmenidad() {
   const prevSlide = (type) => {
     if (type === "conReserva") {
       setCurrentIndexConReserva((prev) =>
-        prev === 0 ? amenidades.conReserva.length - 1 : prev - 1,
+        prev === 0 ? amenidades.conReserva.length - 1 : prev - 1
       );
     } else {
       setCurrentIndexSinReserva((prev) =>
-        prev === 0 ? amenidades.sinReserva.length - 1 : prev - 1,
+        prev === 0 ? amenidades.sinReserva.length - 1 : prev - 1
       );
     }
   };
@@ -104,7 +101,7 @@ export default function VerAmenidad() {
             <div className="mx-16 w-full max-w-md">
               <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
                 <img
-                  src={getRandomImage()}
+                  src={items[currentIndex]?.imagenUrl || "/imagen-placeholder.jpg"}
                   alt={items[currentIndex]?.nombre || "Amenidad"}
                   className="w-full h-full object-cover"
                 />
@@ -146,6 +143,7 @@ export default function VerAmenidad() {
               </p>
             </div>
           )}
+
           <div className="flex justify-end w-full">
             {showButton && items.length > 0 && (
               <button className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-full shadow-md hover:opacity-90 transition-opacity">
