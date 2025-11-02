@@ -14,7 +14,7 @@ export async function GET(req) {
 
   //Estado: pendientes = Sin leer + En proceso
   if (estado === "pendientes") {
-    filtro.estado = { $in: ["Sin leer", "En proceso"] };
+    filtro.estado = { $in: ["Nuevo", "En proceso"] };
   } else if (estado) {
     filtro.estado = estado;
   }

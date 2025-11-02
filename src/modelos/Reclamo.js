@@ -6,8 +6,8 @@ const ReclamoSchema = new mongoose.Schema(
     descripcion: { type: String, required: true },
     estado: {
       type: String,
-      enum: ["Sin leer", "En proceso", "Finalizado"],
-      default: "Sin leer",
+      enum: ["Nuevo", "En proceso", "Finalizado"],
+      default: "Nuevo",
     },
     creadoPor: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
     vivienda: { type: mongoose.Schema.Types.ObjectId, ref: "Vivienda" }, // ✅ nuevo campo
