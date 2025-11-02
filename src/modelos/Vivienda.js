@@ -65,8 +65,8 @@ const ViviendaSchema = new mongoose.Schema({
   collection: "viviendas"
 });
 
-// Índice para búsquedas rápidas por idVivienda
-ViviendaSchema.index({ idVivienda: 1 });
+// No crear esto porque es redundante porque existe unique
+// ViviendaSchema.index({ idVivienda: 1 });
 
 // Índice para búsquedas por condóminos vinculados
 ViviendaSchema.index({ "condominosVinculados.condominoId": 1 });
