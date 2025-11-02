@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AgregarEliminarUsuarios() {
   const [formData, setFormData] = useState({
-    Usuario: "",
+    usuario: "",
     contraseña: "",
     
   });
@@ -111,7 +111,9 @@ export default function AgregarEliminarUsuarios() {
             </label>
             <input
                 type="password"
-                name="confirmarContrasena"
+                name="confirmarContraseña"
+                value={formData.confirmarContraseña || ""}
+                onChange={handleChange}
                 className="w-full border border-gray-300 p-2 rounded"
                 required
             />

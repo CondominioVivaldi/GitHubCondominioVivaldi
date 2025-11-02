@@ -27,7 +27,8 @@ export async function POST(request) {
     }
     const nuevoUsuarioVivienda = new UsuarioVivienda({
       usuario,
-      contraseña
+      contraseña,
+      tipoUsuario: "vivienda"
     });;
     await nuevoUsuarioVivienda.save();
     return NextResponse.json(
