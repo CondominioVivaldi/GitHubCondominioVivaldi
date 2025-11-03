@@ -1,5 +1,3 @@
-// src/app/usuarioAdministrador/amenidades/ver/page.jsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,7 +27,7 @@ export default function VerAmenidad() {
         });
       }
     } catch (error) {
-      console.error("Error fetching amenidades:", error);
+      console.error("Error fetching amenidades desde la API:", error);
     } finally {
       setLoading(false);
     }
@@ -67,6 +65,11 @@ export default function VerAmenidad() {
     }
   };
 
+  // Función para redirigir a la ruta de reservas
+  const goToReservas = () => {
+    window.location.href = "/usuarioAdministrador/reservas/agregar";
+  };
+
   const CarouselSection = ({
     title,
     items,
@@ -75,7 +78,7 @@ export default function VerAmenidad() {
     showButton = false,
   }) => (
     <div className="bg-[var(--Mi-blanco)] w-full max-w-4xl rounded-2xl shadow-2xl p-6 sm:p-8 mb-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-center items-center mb-6">
         <h2 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)]">{title}</h2>
       </div>
 
@@ -138,15 +141,22 @@ export default function VerAmenidad() {
               <h3 className="Mi_texto_negrita_20 text-[var(--Mi-cafe-oscuro)] mb-2">
                 {items[currentIndex].nombre}
               </h3>
-              <p className="text-[var(--Mi-gris)] Mi_texto_20">
-                Tiempo máximo: {items[currentIndex].tiempoMaximo}
-              </p>
+              {/* Mostrar 'Tiempo máximo' SOLO si el tipo es 'conReserva' */}
+              {type === 'conReserva' && (
+                <p className="text-[var(--Mi-gris)] Mi_texto_20">
+                  Tiempo máximo: {items[currentIndex].tiempoMaximo}
+                </p>
+              )}
             </div>
           )}
 
           <div className="flex justify-end w-full">
             {showButton && items.length > 0 && (
-              <button className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-full shadow-md hover:opacity-90 transition-opacity">
+              <button
+                // Asignar la función de navegación al botón
+                onClick={goToReservas}
+                className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-full shadow-md hover:opacity-90 transition-opacity"
+              >
                 Ir a reserva
               </button>
             )}

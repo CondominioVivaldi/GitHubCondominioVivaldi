@@ -15,11 +15,7 @@ export default function AgregarAmenidadPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!nombre || !requiereReserva || !tiempoMaximo || !imagenFile) {
-      setMensaje("Todos los campos son obligatorios.");
-      return;
-    }
-
+    
     const formData = new FormData();
     formData.append("nombre", nombre);
     formData.append("requiereReserva", requiereReserva);
@@ -56,6 +52,8 @@ export default function AgregarAmenidadPage() {
     }
   };
 
+  const esFormularioValido = nombre && requiereReserva && tiempoMaximo && imagenFile;
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-6 lg:px-8 py-10 bg-mi-gradiante-blanco space-y-8">
       <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-xl">
@@ -84,12 +82,14 @@ export default function AgregarAmenidadPage() {
             id="requiereReserva"
             value={requiereReserva}
             onChange={(e) => setRequiereReserva(e.target.value)}
-            className="border border-[var(--Mi-gris)] rounded-lg p-3 w-full text-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
+            className={`border border-[var(--Mi-gris)] rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+              requiereReserva === '' ? 'text-[var(--Mi-gris)]' : 'text-[var(--Mi-cafe-oscuro)]'
+        }`}
             required
           >
             <option value="">Elegir...</option>
-            <option value="sí">Sí</option>
-            <option value="no">No</option>
+            <option value="sí" className="text-[var(--Mi-cafe-oscuro)]">Sí</option>
+            <option value="no" className="text-[var(--Mi-cafe-oscuro)]">No</option>
           </select>
         </div>
 
@@ -102,21 +102,27 @@ export default function AgregarAmenidadPage() {
             id="tiempoMaximo"
             value={tiempoMaximo}
             onChange={(e) => setTiempoMaximo(e.target.value)}
-            className="border border-[var(--Mi-gris)] rounded-lg p-3 w-full text-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
+            className={`border border-[var(--Mi-gris)] rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${
+              tiempoMaximo === '' ? 'text-[var(--Mi-gris)]' : 'text-[var(--Mi-cafe-oscuro)]'
+            }`}
             required
           >
             <option value="">Elegir...</option>
-            <option value="30 minutos">30 minutos</option>
-            <option value="1 hora">1 hora</option>
-            <option value="2 horas">2 horas</option>
-            <option value="3 horas">3 horas</option>
+            <option value="1 hora" className="text-[var(--Mi-cafe-oscuro)]">1 hora</option>
+            <option value="2 horas" className="text-[var(--Mi-cafe-oscuro)]">2 horas</option>
+            <option value="3 horas" className="text-[var(--Mi-cafe-oscuro)]">3 horas</option>
+            <option value="4 horas" className="text-[var(--Mi-cafe-oscuro)]">4 horas</option>
+            <option value="5 horas" className="text-[var(--Mi-cafe-oscuro)]">5 horas</option>
+            <option value="6 horas" className="text-[var(--Mi-cafe-oscuro)]">6 horas</option>
+            <option value="7 horas" className="text-[var(--Mi-cafe-oscuro)]">7 horas</option>
+            <option value="8 horas" className="text-[var(--Mi-cafe-oscuro)]">8 horas</option>
           </select>
         </div>
 
         {/* Imagen */}
         <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8">
           <label htmlFor="imagen" className="Mi_texto_20 mb-2 block text-[var(--Mi-cafe-oscuro)]">
-            Imagen:*
+            Subir imagen:*
           </label>
           <input
             id="imagen"
@@ -136,12 +142,19 @@ export default function AgregarAmenidadPage() {
         </div>
 
         {/* Botón */}
-        <button
-          type="submit"
-          className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-full py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border"
-        >
-          Guardar
-        </button>
+        <div className="flex justify-center pt-4">
+          <button
+            type="submit"
+            disabled={!esFormularioValido}
+            className={`Mi_texto_boton w-auto px-10 py-3 rounded-lg border transition-all duration-300 ${
+              !esFormularioValido
+                ? 'bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] cursor-not-allowed opacity-50'
+                : 'bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] hover:opacity-90'
+            }`}
+          >
+            Guardar
+          </button>
+        </div>
 
         {/* Mensaje */}
         {mensaje && (
