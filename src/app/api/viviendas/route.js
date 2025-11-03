@@ -80,6 +80,134 @@ export async function POST(req) {
   }
 }
 
+
+export async function PATCH(req) {
+  try {
+    const {
+      _id,
+      idVivienda,
+      direccion,
+      modeloCasa,
+      cantidadPersonas,
+      condominosVinculados
+    } = await req.json();
+
+    if (!idVivienda || !direccion || !cantidadPersonas) {
+      return NextResponse.json(
+        { success: false, message: "Faltan campos requeridos." },
+        { status: 400 }
+      );
+    }
+
+    await conectarBaseDeDatos();
+
+    // actualizar la vivienda existente
+    const viviendaExistente = await Vivienda.findById(_id)
+
+
+    console.log("ID A BUSCAR!!!", _id, idVivienda, viviendaExistente)
+
+
+    viviendaExistente.idVivienda = idVivienda;
+    viviendaExistente.direccion = direccion;
+    viviendaExistente.modeloCasa = modeloCasa || null;
+    viviendaExistente.cantidadPersonas = parseInt(cantidadPersonas);
+    viviendaExistente.condominosVinculados = condominosVinculados || [];
+
+    await viviendaExistente.save();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Vivienda editada exitosamente.",
+        vivienda: viviendaExistente
+      },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    console.error("Error en /api/viviendas:", error);
+
+    if (error.code === 11000) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Ya existe una vivienda con ese ID"
+        },
+        { status: 400 }
+      );
+    }
+
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return NextResponse.json(
+        {
+          success: false,
+          message: messages.join(", ")
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: error.message || "Error interno del servidor." },
+      { status: 500 }
+    );
+  }
+}
+
+
+export async function DELETE(req) {
+  try {
+    const {
+      _id
+    } = await req.json();
+
+    await conectarBaseDeDatos();
+
+    // actualizar la vivienda existente
+    await Vivienda.findByIdAndDelete(_id)
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Vivienda editada exitosamente.",
+      },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    console.error("Error en /api/viviendas:", error);
+
+    if (error.code === 11000) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Ya existe una vivienda con ese ID"
+        },
+        { status: 400 }
+      );
+    }
+
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return NextResponse.json(
+        {
+          success: false,
+          message: messages.join(", ")
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: error.message || "Error interno del servidor." },
+      { status: 500 }
+    );
+  }
+}
+
+
 // 📋 Obtener viviendas o verificar si un ID ya existe
 export async function GET(req) {
   try {
@@ -117,3 +245,4 @@ export async function GET(req) {
     );
   }
 }
+
