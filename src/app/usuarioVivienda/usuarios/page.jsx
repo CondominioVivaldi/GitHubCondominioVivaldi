@@ -1,236 +1,155 @@
 // src/app/usuarioVivienda/usuarios/page.jsx
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function AgregarEliminarUsuarios() {
-  const [usuarios, setUsuarios] = useState([]);
-  const [selectedUser, setSelectedUser] = useState("");
-  const [selectedUserForChange, setSelectedUserForChange] = useState("");
-  const [nuevaContrasena, setNuevaContrasena] = useState("");
-  const [confirmarContrasena, setConfirmarContrasena] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState({});
+export default function UsuarioViviendaUsuariosPage() {
+  const [usuario, setUsuario] = useState(null);
+  const [nuevaPass, setNuevaPass] = useState("");
+  const [confirmarPass, setConfirmarPass] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [alerta, setAlerta] = useState("");
+  const [passValida, setPassValida] = useState(false);
 
   useEffect(() => {
-    fetchUsuarios();
+    const fetchUsuario = async () => {
+      try {
+        const res = await fetch("/api/usuarios/actual");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setUsuario(data.usuario);
+        } else {
+          setMensaje(data.message || "No se pudo obtener la información del usuario.");
+        }
+      } catch (error) {
+        console.error(error);
+        setMensaje("Error al obtener usuario actual.");
+      }
+    };
+    fetchUsuario();
   }, []);
 
-  const fetchUsuarios = async () => {
-    try {
-      const response = await fetch("/api/usuarios");
-      const data = await response.json();
-      if (data.success) {
-        setUsuarios(data.usuarios);
-      }
-    } catch (error) {
-      console.error("Error fetching usuarios:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!selectedUserForChange) {
-      newErrors.selectedUserForChange = "Debe seleccionar un usuario";
-    }
-    if (!nuevaContrasena) {
-      newErrors.nuevaContrasena = "La nueva contraseña es requerida";
-    }
-    if (!confirmarContrasena) {
-      newErrors.confirmarContrasena = "Debe confirmar la contraseña";
-    }
-    if (
-      nuevaContrasena &&
-      confirmarContrasena &&
-      nuevaContrasena !== confirmarContrasena
-    ) {
-      newErrors.confirmarContrasena = "Las contraseñas no coinciden";
+  // Validación en tiempo real
+  useEffect(() => {
+    if (!nuevaPass && !confirmarPass) {
+      setMensaje("");
+      setPassValida(false);
+      return;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    if (nuevaPass.length < 6) {
+      setMensaje("La contraseña debe tener al menos 6 caracteres.");
+      setPassValida(false);
+    } else if (nuevaPass !== confirmarPass) {
+      setMensaje("Las contraseñas no coinciden.");
+      setPassValida(false);
+    } else {
+      setMensaje("");
+      setPassValida(true);
+    }
+  }, [nuevaPass, confirmarPass]);
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    setMessage("");
+  const manejarCambioPassword = async () => {
+    if (!passValida) return;
 
     try {
-      const response = await fetch("/api/usuarios", {
+      const res = await fetch("/api/usuarios", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          usuario: selectedUserForChange,
-          nuevaContrasena,
+          usuario: usuario.usuario,
+          nuevaContrasena: nuevaPass,
         }),
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setMessage("Contraseña actualizada exitosamente");
-        setSelectedUserForChange("");
-        setNuevaContrasena("");
-        setConfirmarContrasena("");
-        setErrors({});
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.message || "Contraseña actualizada correctamente.");
+        setAlerta("Listo! Recuerde usar su nueva contraseña en su próximo inicio de sesión.");
+        setNuevaPass("");
+        setConfirmarPass("");
+        setPassValida(false);
       } else {
-        setMessage(data.message || "Error al actualizar contraseña");
+        setMensaje(data.message || "Hubo un error al actualizar la contraseña.");
+        setAlerta("");
       }
     } catch (error) {
-      setMessage("Error de conexión. Intente nuevamente.");
-    } finally {
-      setIsSubmitting(false);
+      console.error(error);
+      setMensaje("Hubo un error al actualizar la contraseña.");
+      setAlerta("");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-[var(--Mi-blanco)] w-full max-w-2xl rounded-2xl shadow-2xl p-6 sm:p-8">
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--Mi-cafe-oscuro)]"></div>
-            <span className="ml-3 text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-              Cargando usuarios...
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const botonHabilitado = passValida;
+
+  // Clases dinámicas para bordes según validación
+  const bordeNuevaPass = nuevaPass ? (nuevaPass.length >= 6 ? "border-green-500" : "border-red-500") : "border-[var(--Mi-gris)]";
+  const bordeConfirmPass =
+    confirmarPass
+      ? nuevaPass === confirmarPass && nuevaPass.length >= 6
+        ? "border-green-500"
+        : "border-red-500"
+      : "border-[var(--Mi-gris)]";
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-6 lg:px-8 py-10 bg-mi-gradiante-blanco space-y-8">
-      <div className="bg-[var(--Mi-blanco)] w-full max-w-4xl rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-blue-500">
-        <div className="text-center mb-6">
-          <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] mb-4">
-            Usuarios
-          </h1>
-          <p className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-            Si desea cambiar de usuario, seleccione su otra cuenta
-          </p>
-        </div>
+    <div className="max-w-3xl mx-auto p-6 space-y-12 text-[var(--Mi-cafe-oscuro)]">
 
-        <div className="flex items-center justify-center space-x-4">
-          <label className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-            Usuario actual:
-          </label>
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] text-[var(--Mi-gris)] min-w-64"
-          >
-            {usuarios.map((usuario) => (
-              <option key={usuario._id} value={usuario.usuario}>
-                {usuario.usuario}
-              </option>
-            ))}
-          </select>
+      {/* Sección Usuario */}
+      <div className="p-6 bg-white rounded-[8px] shadow">
+        <h1 className="Mi_H2_40 mb-6 text-center">Usuario</h1>
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col">
+            <label className="Mi_texto_20 font-semibold mb-1">Usuario actual</label>
+            <input
+              type="text"
+              value={usuario?.usuario || ""}
+              disabled
+              className="Mi_texto_20 w-full p-2 border rounded-[8px] bg-gray-100 cursor-not-allowed border-[var(--Mi-gris)]"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="bg-[var(--Mi-blanco)] w-full max-w-4xl rounded-2xl shadow-2xl p-6 sm:p-8">
-        <div className="text-center mb-8">
-          <h2 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)]">
-            Cambiar contraseña
-          </h2>
-        </div>
-
-        <form onSubmit={handlePasswordChange} className="space-y-6">
-          <div className="flex items-center justify-center space-x-4">
-            <label className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20 min-w-fit">
-              Usuario:
-            </label>
-            <select
-              value={selectedUserForChange}
-              onChange={(e) => setSelectedUserForChange(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] text-[var(--Mi-cafe-oscuro)] min-w-64 ${errors.selectedUserForChange ? "border-red-500" : ""}`}
-            >
-              {usuarios.map((usuario) => (
-                <option key={usuario._id} value={usuario.usuario}>
-                  {usuario.usuario}
-                </option>
-              ))}
-            </select>
-          </div>
-          {errors.selectedUserForChange && (
-            <div className="text-center">
-              <span className="text-red-500 text-sm">
-                {errors.selectedUserForChange}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center justify-center space-x-4">
-            <label className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20 min-w-fit">
-              Nueva contraseña:
-            </label>
+      {/* Sección Cambiar Contraseña */}
+      <div className="p-6 bg-white rounded-[8px] shadow">
+        <h1 className="Mi_H2_40 mb-6 text-center">Cambiar contraseña</h1>
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col">
+            <label className="Mi_texto_20 font-semibold mb-1">Nueva contraseña</label>
             <input
               type="password"
-              placeholder="Escribir contraseña..."
-              value={nuevaContrasena}
-              onChange={(e) => setNuevaContrasena(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] min-w-64 ${errors.nuevaContrasena ? "border-red-500" : ""}`}
+              value={nuevaPass}
+              onChange={(e) => setNuevaPass(e.target.value)}
+              className={`Mi_texto_20 w-full p-2 border rounded-[8px] ${bordeNuevaPass}`}
             />
           </div>
-          {errors.nuevaContrasena && (
-            <div className="text-center">
-              <span className="text-red-500 text-sm">
-                {errors.nuevaContrasena}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center justify-center space-x-4">
-            <label className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20 min-w-fit">
-              Confirmar contraseña:
-            </label>
+          <div className="flex flex-col">
+            <label className="Mi_texto_20 font-semibold mb-1">Confirmar nueva contraseña</label>
             <input
               type="password"
-              placeholder="Repite contraseña..."
-              value={confirmarContrasena}
-              onChange={(e) => setConfirmarContrasena(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] min-w-64 ${errors.confirmarContrasena ? "border-red-500" : ""}`}
+              value={confirmarPass}
+              onChange={(e) => setConfirmarPass(e.target.value)}
+              className={`Mi_texto_20 w-full p-2 border rounded-[8px] ${bordeConfirmPass}`}
             />
           </div>
-          {errors.confirmarContrasena && (
-            <div className="text-center">
-              <span className="text-red-500 text-sm">
-                {errors.confirmarContrasena}
-              </span>
-            </div>
-          )}
-
-          {message && (
-            <div
-              className={`text-center p-3 rounded-lg ${message.includes("exitosamente") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-            >
-              {message}
-            </div>
-          )}
-
-          <div className="flex justify-center pt-6">
+          <div className="flex justify-center mt-4">
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-full shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              onClick={manejarCambioPassword}
+              disabled={!botonHabilitado}
+              className={`Mi_texto_boton px-6 py-3 rounded-[8px] transition ${
+                botonHabilitado
+                  ? "bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] hover:opacity-90"
+                  : "bg-gray-400 text-[var(--Mi-blanco)] cursor-not-allowed"
+              }`}
             >
-              {isSubmitting ? "Restableciendo..." : "Restablecer"}
+              Restablecer
             </button>
           </div>
-        </form>
+          {mensaje && <p className="Mi_texto_20 text-red-600 mt-2">{mensaje}</p>}
+          {alerta && <p className="Mi_texto_20 text-emerald-500 mt-1">{alerta}</p>}
+        </div>
       </div>
+
     </div>
   );
 }
