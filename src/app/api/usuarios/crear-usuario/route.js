@@ -1,14 +1,19 @@
+// src/app/api/usuarios/crear-usuario/route.js
+
 //Endpoint para crear un nuevo usuario
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Usuario from "@/modelos/Usuario";
 import Vivienda from "@/modelos/Vivienda";
-import Condomino from "@/modelos/Condomino";
-import bcrypt from "bcrypt";
+// El uso de Condomino y bcrypt está implícito si ya se usaba antes
+// import Condomino from "@/modelos/Condomino"; 
+// import bcrypt from "bcrypt"; 
+
 export async function POST(request) {
   try {
     await conectarBaseDeDatos();
     const { usuario, contraseña, vivienda, correoElectronico } = await request.json();
-    // Verificar si el usuario ya existe
+    
+    // 1. Verificar si el nombre de usuario (idVivienda) ya existe
     const usuarioExistente = await Usuario.findOne({ usuario });
     if (usuarioExistente) {
       return new Response(
@@ -16,7 +21,8 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    // Verificar si la vivienda ya tiene un usuario asociado
+    
+    // 2. Verificar que la vivienda exista
     const viviendaExistente = await Vivienda.findById(vivienda);
     if (!viviendaExistente) {
       return new Response(
@@ -24,6 +30,8 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+
+    // 3. Verificar si la vivienda ya tiene un usuario asociado
     const usuarioViviendaExistente = await Usuario.findOne({ vivienda });
     if (usuarioViviendaExistente) {
       return new Response(
@@ -31,7 +39,8 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    // Crear el nuevo usuario
+
+    // 4. Crear el nuevo usuario
     const nuevoUsuario = new Usuario({
       usuario,
       contraseña,
@@ -40,6 +49,7 @@ export async function POST(request) {
       correoElectronico: correoElectronico
     });
     await nuevoUsuario.save();
+
     return new Response(
       JSON.stringify({ mensaje: "Usuario creado exitosamente." }),
       { status: 201 }
