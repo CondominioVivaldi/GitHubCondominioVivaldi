@@ -99,4 +99,5 @@ export async function PUT(req) {
     console.error("Error al actualizar reclamo:", error);
     return NextResponse.json({ error: "Error interno al actualizar reclamo." }, { status: 500 });
   }
+  
 }
