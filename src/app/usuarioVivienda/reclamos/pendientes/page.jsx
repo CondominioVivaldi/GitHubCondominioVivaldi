@@ -6,20 +6,23 @@ export default function ReclamosPendientesUsuario() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [respuesta, setRespuesta] = useState("");
 
-  const tipoUsuario = typeof window !== "undefined" ? localStorage.getItem("tipoUsuario") : "usuario";
+  const tipoUsuario =
+    typeof window !== "undefined" ? localStorage.getItem("tipoUsuario") : "usuario";
 
   useEffect(() => {
     const cargar = async () => {
-      const usuarioId = typeof window !== "undefined" ? localStorage.getItem("usuarioId") : null;
+      const usuarioId =
+        typeof window !== "undefined" ? localStorage.getItem("usuarioId") : null;
       if (!usuarioId && tipoUsuario !== "admin") return;
 
-      const url = tipoUsuario === "admin"
-        ? `/api/reclamos?estado=pendientes`
-        : `/api/reclamos?estado=pendientes&creadoPor=${usuarioId}`;
+      const url =
+        tipoUsuario === "admin"
+          ? `/api/reclamos?estado=pendientes`
+          : `/api/reclamos?estado=pendientes&creadoPor=${usuarioId}`;
 
       const res = await fetch(url, { cache: "no-store" });
       const data = await res.json();
-      const items = Array.isArray(data) ? data : (data.reclamos || []);
+      const items = Array.isArray(data) ? data : data.reclamos || [];
       setReclamos(items);
     };
 
@@ -50,9 +53,37 @@ export default function ReclamosPendientesUsuario() {
     }
   };
 
+  // 🆕 NUEVO: función para finalizar reclamo
+const finalizarReclamo = async () => {
+  if (!seleccionado) return;
+
+  try {
+    const res = await fetch("/api/reclamos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: seleccionado._id,
+        estado: "Finalizado",
+        autor: "usuario",
+        mensaje: "El reclamo ha sido finalizado por el usuario.",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.reclamo) {
+      // 🔄 Actualizamos la lista sin mensajes ni alertas
+      setReclamos((prev) => prev.filter((r) => r._id !== seleccionado._id));
+      setSeleccionado(null);
+    }
+  } catch (error) {
+    console.error("❌ Error al finalizar reclamo:", error);
+  }
+};
+
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
-
       {/* 📌 Cuadro 1: Tabla */}
       <div className="bg-[var(--Mi-blanco)] w-full max-w-[1200px] rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
         <div className="overflow-x-auto">
@@ -107,7 +138,6 @@ export default function ReclamosPendientesUsuario() {
       {/* 📌 Cuadros 2 y 3 en dos columnas */}
       {seleccionado && (
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-
           {/* Columna izquierda: Asunto + Histórico */}
           <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 animate-fade-in">
             {/* Asunto */}
@@ -123,29 +153,42 @@ export default function ReclamosPendientesUsuario() {
 
             {/* Histórico */}
             <div>
-              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Histórico de conversación:</h3>
+              <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">
+                Histórico de conversación:
+              </h3>
               <div className="Mi_texto_20 border border-gray-300 rounded-lg p-3 bg-gray-50 h-64 overflow-y-auto space-y-4">
                 <p className="text-gray-600">
-                  {`Vivienda ${seleccionado.vivienda?.numero ?? seleccionado.creadoPor?.usuario ?? "sin identificar"}, ${new Date(seleccionado.createdAt).toLocaleDateString("es-ES")}, ${new Date(seleccionado.createdAt).toLocaleTimeString("es-ES", { hour: '2-digit', minute: '2-digit' })}`}
+                  {`Vivienda ${
+                    seleccionado.vivienda?.numero ??
+                    seleccionado.creadoPor?.usuario ??
+                    "sin identificar"
+                  }, ${new Date(seleccionado.createdAt).toLocaleDateString("es-ES")}, ${new Date(
+                    seleccionado.createdAt
+                  ).toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`}
                 </p>
                 <p>{seleccionado.descripcion}</p>
 
-                {Array.isArray(seleccionado.conversacion) && seleccionado.conversacion.length > 0 && (
-                  <div className="space-y-4">
-                    {seleccionado.conversacion.map((c, i) => (
-                      <div key={i} className="border-t border-gray-300 pt-2">
-                        <p className="text-gray-600">
-                          {c.autor === "admin"
-                            ? "Administrador"
-                            : tipoUsuario === "admin"
+                {Array.isArray(seleccionado.conversacion) &&
+                  seleccionado.conversacion.length > 0 && (
+                    <div className="space-y-4">
+                      {seleccionado.conversacion.map((c, i) => (
+                        <div key={i} className="border-t border-gray-300 pt-2">
+                          <p className="text-gray-600">
+                            {c.autor === "admin"
+                              ? "Administrador"
+                              : tipoUsuario === "admin"
                               ? "Usuario"
-                              : "Tú"} – {new Date(c.fecha).toLocaleString("es-ES")}
-                        </p>
-                        <p>{c.mensaje}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                              : "Tú"}{" "}
+                            – {new Date(c.fecha).toLocaleString("es-ES")}
+                          </p>
+                          <p>{c.mensaje}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -155,7 +198,11 @@ export default function ReclamosPendientesUsuario() {
             <div className="flex justify-between items-center mb-2">
               <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)]">Detalles:</h3>
               <div className="flex gap-4">
-                <button className="Mi_texto_20 bg-mi-gradiente-boton-principal Mi_texto_boton text-white px-4 py-2 rounded-lg shadow hover:opacity-90">
+                {/* 🆕 Cambiado: ahora llama a la función finalizarReclamo */}
+                <button
+                  onClick={finalizarReclamo}
+                  className="Mi_texto_20 bg-mi-gradiente-boton-principal Mi_texto_boton text-white px-4 py-2 rounded-lg shadow hover:opacity-90"
+                >
                   Finalizar reclamo
                 </button>
                 <button

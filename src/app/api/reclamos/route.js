@@ -14,7 +14,7 @@ export async function GET(req) {
 
   //Estado: pendientes = Sin leer + En proceso
   if (estado === "pendientes") {
-    filtro.estado = { $in: ["Sin leer", "En proceso"] };
+    filtro.estado = { $in: ["Nuevo", "En proceso"] };
   } else if (estado) {
     filtro.estado = estado;
   }
@@ -99,4 +99,5 @@ export async function PUT(req) {
     console.error("Error al actualizar reclamo:", error);
     return NextResponse.json({ error: "Error interno al actualizar reclamo." }, { status: 500 });
   }
+  
 }
