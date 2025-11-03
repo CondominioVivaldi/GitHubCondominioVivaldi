@@ -25,7 +25,7 @@ const AmenidadSchema = new mongoose.Schema(
   },
   {
     timestamps: false,
-    collection: "amenidads",
+    collection: "amenidades",
   },
 );
 
