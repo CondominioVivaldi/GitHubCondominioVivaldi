@@ -44,6 +44,13 @@ const UsuarioSchema = new mongoose.Schema({
   activo: {
     type: Boolean,
     default: true
+  },
+  vivienda: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vivienda",
+    required: function() {
+      return this.tipoUsuario === "vivienda";
+    }
   }
 }, {
   timestamps: true,

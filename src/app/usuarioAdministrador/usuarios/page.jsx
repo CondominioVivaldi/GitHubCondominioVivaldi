@@ -3,74 +3,114 @@
 import { useState, useEffect } from "react";
 
 export default function AgregarEliminarUsuarios() {
+  const [viviendasVinculadas, setViviendasVinculadas] = useState([]);
   const [formData, setFormData] = useState({
     usuario: "",
     contraseña: "",
-    
+    confirmarContraseña: "",
+    vivienda: "",
+    correoElectronico: ""
   });
   const [mensaje, setMensaje] = useState("");
-  const [viviendasVinculadas, setViviendasVinculadas] = useState([]);
   useEffect(() => {
-    const fetchViviendas = async () => {
+    // Obtener las viviendas vinculadas desde el backend
+    async function fetchViviendas() {
       try {
         const response = await fetch("/api/viviendas/buscar-viviendas");
         const data = await response.json();
         setViviendasVinculadas(data.viviendas || []);
-      } catch (error) {
-        console.error("Error al obtener las viviendas:", error);
       }
-    };
+      catch (error) {
+        console.error("Error al obtener viviendas vinculadas:", error);
+      }
+    }
     fetchViviendas();
-  }, []);
+  }
+, []);
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
+  const { name, value } = e.target;
+
+  if (name === "vivienda") {
+    const viviendaSeleccionada = viviendasVinculadas.find(
+      (v) => v._id === value
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      vivienda: value,
+      usuario: viviendaSeleccionada ? viviendaSeleccionada.idVivienda : "",
+      correoElectronico: viviendaSeleccionada
+        ? viviendaSeleccionada.correoElectronico || ""
+        : prev.correoElectronico,
+    }));
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.contraseña !== formData.confirmarContraseña) {
+      setMensaje("Las contraseñas no coinciden.");
+      return;
+    }
     try {
       const response = await fetch("/api/usuarios/crear-usuario", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          usuario: formData.usuario,
+          correoElectronico: formData.correoElectronico,
+          contraseña: formData.contraseña,
+          vivienda: formData.vivienda
+        })
       });
       const data = await response.json();
-      if (response.ok) {
-        setMensaje("Usuario creado exitosamente.");
-      }
-      else {
-        setMensaje(`Error: ${data.message}`);
-      }
+      setMensaje(data.mensaje || "Usuario creado exitosamente.");
     } catch (error) {
-      console.error("Error al crear el usuario:", error);
+      console.error("Error al crear usuario:", error);
       setMensaje("Error al crear el usuario.");
     }
   };
 
   const handleDelete = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("/api/usuarios/eliminar-usuario", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ vivienda: formData.vivienda }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setMensaje("Usuario eliminado exitosamente.");
-      }
-      else {
-        setMensaje(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      console.error("Error al eliminar el usuario:", error);
-      setMensaje("Error al eliminar el usuario.");
-    }
-  };
+  e.preventDefault();
+
+  // Buscar la vivienda seleccionada
+  const viviendaSeleccionada = viviendasVinculadas.find(
+    (v) => v._id === formData.vivienda
+  );
+
+  if (!viviendaSeleccionada) {
+    setMensaje("Seleccione una vivienda válida.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/usuarios/eliminar-usuario", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        idVivienda: viviendaSeleccionada.idVivienda
+      })
+    });
+
+    const data = await response.json();
+    setMensaje(data.mensaje || "Usuario eliminado exitosamente.");
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error);
+    setMensaje("Error al eliminar el usuario.");
+  }
+};
+
 
   return (
      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
@@ -83,14 +123,27 @@ export default function AgregarEliminarUsuarios() {
             <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
                 Vivienda
             </label>
-            <select className="w-full border border-gray-300 p-2 rounded" name="usuario" value={formData.usuario} onChange={handleChange} required>
-                <option value="" >Seleccione una vivienda</option>
+            <select className="w-full border border-gray-300 p-2 rounded" name="vivienda" value={formData.vivienda} onChange={handleChange} required>
+                <option value="">Seleccione una vivienda</option>
                 {viviendasVinculadas.map((vivienda) => (
                     <option key={vivienda._id} value={vivienda._id}>
                         {vivienda.idVivienda}
                     </option>
                 ))}
             </select>
+            </div>
+            <div className="flex items-center space-x-4"> 
+            <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
+                Correo Electrónico
+            </label>
+            <input
+                type="email"
+                name="correoElectronico"
+                value={formData.correoElectronico}
+                onChange={handleChange}
+                className="w-full border border-gray-300 p-2 rounded"
+                required
+            />
             </div>
             <div className="flex items-center space-x-4">
             <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
@@ -153,6 +206,7 @@ export default function AgregarEliminarUsuarios() {
               Eliminar Usuario
             </button>
           </form>
+          {mensaje && <p className="mt-4 text-center text-[var(--Mi-cafe-oscuro)]">{mensaje}</p>}
         </div>
     </div>
   );

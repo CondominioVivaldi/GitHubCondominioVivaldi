@@ -1,51 +1,54 @@
-//Enpoint para craer un nuevo usuario vivienda
-import { NextResponse } from "next/server";
-import {conectarBaseDeDatos} from "@/lib/mongodb";
-import UsuarioVivienda from "@/modelos/UsuarioVivienda";
+//Endpoint para crear un nuevo usuario
+import { conectarBaseDeDatos } from "@/lib/mongodb";
+import Usuario from "@/modelos/Usuario";
+import Vivienda from "@/modelos/Vivienda";
+import Condomino from "@/modelos/Condomino";
+import bcrypt from "bcrypt";
 export async function POST(request) {
   try {
     await conectarBaseDeDatos();
-    const { usuario, contraseña, confirmarContraseña } = await request.json();
-
-    if (!usuario || !contraseña || !confirmarContraseña) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Todos los campos son obligatorios."
-        },
+    const { usuario, contraseña, vivienda, correoElectronico } = await request.json();
+    // Verificar si el usuario ya existe
+    const usuarioExistente = await Usuario.findOne({ usuario });
+    if (usuarioExistente) {
+      return new Response(
+        JSON.stringify({ mensaje: "El nombre de usuario ya está en uso." }),
         { status: 400 }
       );
     }
-    if (contraseña !== confirmarContraseña) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Las contraseñas no coinciden."
-        },
+    // Verificar si la vivienda ya tiene un usuario asociado
+    const viviendaExistente = await Vivienda.findById(vivienda);
+    if (!viviendaExistente) {
+      return new Response(
+        JSON.stringify({ mensaje: "La vivienda no existe." }),
         { status: 400 }
       );
     }
-    const nuevoUsuarioVivienda = new UsuarioVivienda({
+    const usuarioViviendaExistente = await Usuario.findOne({ vivienda });
+    if (usuarioViviendaExistente) {
+      return new Response(
+        JSON.stringify({ mensaje: "La vivienda ya tiene un usuario asociado." }),
+        { status: 400 }
+      );
+    }
+    // Crear el nuevo usuario
+    const nuevoUsuario = new Usuario({
       usuario,
       contraseña,
-      tipoUsuario: "vivienda"
-    });;
-    await nuevoUsuarioVivienda.save();
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Usuario vivienda creado exitosamente."
-      },
+      tipoUsuario: "vivienda",
+      vivienda,
+      correoElectronico: correoElectronico
+    });
+    await nuevoUsuario.save();
+    return new Response(
+      JSON.stringify({ mensaje: "Usuario creado exitosamente." }),
       { status: 201 }
     );
   }
   catch (error) {
-    console.error("Error en /api/usuarios/crear-usuario:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Error al crear el usuario vivienda."
-      },
+    console.error("Error al crear el usuario:", error);
+    return new Response(
+      JSON.stringify({ mensaje: "Error interno del servidor." }),
       { status: 500 }
     );
   }
