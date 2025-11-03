@@ -116,7 +116,7 @@ export default function AgregarEliminarUsuarios() {
      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
         <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[722px] flex flex-col items-center">
         <form onSubmit={handleSubmit} className="space-y-4 w-[553px]">
-          <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] text-left mb-6">
+          <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] text-center mb-6">
             Crear Usuario
           </h1>
             <div className="flex items-center space-x-4">
@@ -183,7 +183,7 @@ export default function AgregarEliminarUsuarios() {
         
         <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[722px] flex flex-col items-center">
         <form onSubmit={handleDelete} className="space-y-4 w-[553px]">
-            <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] text-left mb-6">
+            <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] text-center mb-6">
             Eliminar Usuario
             </h1>
             <div className="flex items-center space-x-4">

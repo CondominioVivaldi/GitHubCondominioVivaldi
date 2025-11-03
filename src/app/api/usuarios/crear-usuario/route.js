@@ -1,3 +1,5 @@
+// src/app/api/usuarios/crear-usuario/route.js
+
 //Endpoint para crear un nuevo usuario
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Usuario from "@/modelos/Usuario";

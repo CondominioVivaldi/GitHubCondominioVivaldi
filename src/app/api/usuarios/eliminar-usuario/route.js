@@ -1,3 +1,5 @@
+// src/app/api/usuarios/eliminar-usuario/route.js
+
 //Endpoint para eliminar un usuario por su vivienda
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Usuario from "@/modelos/Usuario";
