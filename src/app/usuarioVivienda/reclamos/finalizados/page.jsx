@@ -1,15 +1,5 @@
 // src/app/usuarioVivienda/reclamos/finalizados/page.jsx
 
-// export default function ReclamosFinalizados() {
-//  return (
-//    <div className="flex justify-center items-center h-full">
-//      <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] text-center">
-//        Sistema del condómino - Reclamos Finalizados
-//      </h1>
-//    </div>
-//  );
-// }
-
 "use client";
 import * as React from "react";
 
@@ -17,6 +7,12 @@ import * as React from "react";
 function DateRangeSelector({ onBuscar }) {
   const [inicio, setInicio] = React.useState("");
   const [fin, setFin] = React.useState("");
+
+  React.useEffect(() => {
+    if (inicio && fin) {
+      onBuscar(inicio, fin);
+    }
+  }, [inicio, fin]); // ← 🔥 Ejecuta búsqueda automática
 
   return (
     <section className="flex absolute justify-center items-center px-0 pt-3.5 pb-2 bg-white rounded-xl h-[184px] left-[50px] top-[65px] w-[400px] max-md:relative max-md:left-0 max-md:mb-5 max-md:w-full">
@@ -52,62 +48,12 @@ function DateRangeSelector({ onBuscar }) {
   );
 }
 
-// 🔹 Icono de búsqueda
-function ActionIcons({ onBuscar }) {
-  const handleBuscar = () => {
-    const inicio = document.getElementById("inicio-fecha")?.value;
-    const fin = document.getElementById("fin-fecha")?.value;
-    if (inicio && fin) onBuscar(inicio, fin);
-  };
-
-  return (
-    <div className="flex items-center gap-3 mb-3">
-      {/* 👁️ Buscar */}
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 32 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        onClick={handleBuscar}
-        className="cursor-pointer hover:scale-110 transition-transform"
-      >
-        <g clipPath="url(#clip0)">
-          <path
-            d="M1.33398 16C1.33398 16 6.66732 5.33337 16.0007 5.33337C25.334 5.33337 30.6673 16 30.6673 16C30.6673 16 25.334 26.6667 16.0007 26.6667C6.66732 26.6667 1.33398 16 1.33398 16Z"
-            stroke="#1E1E1E"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M16.0007 20C18.2098 20 20.0007 18.2092 20.0007 16C20.0007 13.7909 18.2098 12 16.0007 12C13.7915 12 12.0007 13.7909 12.0007 16C12.0007 18.2092 13.7915 20 16.0007 20Z"
-            stroke="#1E1E1E"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0">
-            <rect width="32" height="32" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-    </div>
-  );
-}
-
 // 🔹 Tabla de reclamos finalizados
-function ReclamosTable({ data, onBuscar, onSelect, selectedId, mensajeError }) {
+function ReclamosTable({ data, onSelect, selectedId, mensajeError }) {
   return (
     <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in absolute left-[500px] top-[65px] w-[914px] h-[351px]">
       <div className="overflow-x-auto">
         <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
-          <div className="flex items-center justify-start mb-2">
-            <ActionIcons onBuscar={onBuscar} />
-          </div>
-
           {/* Mensaje de error */}
           {mensajeError && (
             <div className="text-red-600 text-center font-semibold mb-2 animate-pulse">
@@ -118,7 +64,7 @@ function ReclamosTable({ data, onBuscar, onSelect, selectedId, mensajeError }) {
           <table className="border border-[var(--Mi-cafe-oscuro)] rounded-lg overflow-hidden w-full">
             <thead className="bg-mi-gradiante-azul text-[var(--Mi-blanco)] Mi_texto_negrita_20 text-center sticky top-0">
               <tr>
-                <th className="px-4 py-3">Acción</th>
+                <th className="px-4 py-3">Ver</th>
                 <th className="px-4 py-3">Fecha</th>
                 <th className="px-4 py-3">Asunto</th>
                 <th className="px-4 py-3">Vivienda</th>
@@ -168,13 +114,13 @@ function ReclamosTable({ data, onBuscar, onSelect, selectedId, mensajeError }) {
   );
 }
 
-// 🔹 Histórico de conversación
+// 🔹 Histórico de conversación (sin cambios)
 function ConversationHistory({ reclamo }) {
   if (!reclamo) return null;
 
   return (
-    <section className="flex justify-start items-start w-full pl-125 py-120">
-      <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 w-full max-w-[700px]">
+    <section className="flex justify-center items-start w-full pl-125 py-120">
+      <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 w-full max-w-[914px] mx-auto">
         <div className="mb-6">
           <h3 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-2">Asunto:</h3>
           <input
@@ -221,7 +167,8 @@ export default function Page() {
   const [mensajeError, setMensajeError] = React.useState("");
 
   const buscar = async (inicio, fin) => {
-    const usuarioId = typeof window !== "undefined" ? localStorage.getItem("usuarioId") : null;
+    const usuarioId =
+      typeof window !== "undefined" ? localStorage.getItem("usuarioId") : null;
 
     const limpiarYMostrar = (mensaje) => {
       setMensajeError(mensaje);
@@ -249,8 +196,16 @@ export default function Page() {
       return;
     }
 
-    const inicioSinTiempo = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), fechaInicio.getDate());
-    const finSinTiempo = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), fechaFin.getDate());
+    const inicioSinTiempo = new Date(
+      fechaInicio.getFullYear(),
+      fechaInicio.getMonth(),
+      fechaInicio.getDate()
+    );
+    const finSinTiempo = new Date(
+      fechaFin.getFullYear(),
+      fechaFin.getMonth(),
+      fechaFin.getDate()
+    );
     const hoySinTiempo = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 
     if (inicioSinTiempo > hoySinTiempo || finSinTiempo > hoySinTiempo) {
@@ -287,7 +242,6 @@ export default function Page() {
       <DateRangeSelector onBuscar={buscar} />
       <ReclamosTable
         data={reclamos}
-        onBuscar={buscar}
         onSelect={setReclamoSeleccionado}
         selectedId={reclamoSeleccionado?._id}
         mensajeError={mensajeError}
