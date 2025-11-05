@@ -1,3 +1,5 @@
+// src/app/api/condominos/[id]/route.js
+
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Condomino from "@/modelos/Condomino";

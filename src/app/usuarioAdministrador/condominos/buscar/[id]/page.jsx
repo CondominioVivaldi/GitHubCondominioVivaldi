@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/condominos/buscar/[id]/page.jsx
+
 "use client";
 
 import { useParams } from "next/navigation";

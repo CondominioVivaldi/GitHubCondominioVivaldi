@@ -1,3 +1,5 @@
+// src/componentes/MenuAdministrador.jsx
+
 "use client";
 
 import { useState } from "react";

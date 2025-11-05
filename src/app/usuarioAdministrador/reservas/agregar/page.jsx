@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/reservas/agregar/page.jsx
+
 "use client";
 import Calendar from "./calendar";
 

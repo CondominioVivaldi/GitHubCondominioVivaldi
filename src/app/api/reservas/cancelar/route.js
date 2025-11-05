@@ -1,3 +1,5 @@
+// src/app/api/reservas/cancelar/route.js
+
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Reserva from "@/modelos/Reserva"; 
