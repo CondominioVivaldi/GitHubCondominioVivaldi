@@ -1,42 +1,115 @@
 // src/app/api/condominos/[id]/route.js
-
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Condomino from "@/modelos/Condomino";
-import Mongoose from "mongoose";
 
-export async function GET(req, params) {
+// 🔹 GET: Obtener condómino por ID
+export async function GET(req, { params }) {
   try {
-    const data = await params.params;
-    const id = data.id;
+    const { id } = await params;
+    await conectarBaseDeDatos();
+    const condomino = await Condomino.findById(id);
 
-    const { searchParams } = new URL(req.url);
+    if (!condomino) {
+      return NextResponse.json(
+        { success: false, message: "Condómino no encontrado." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, condomino });
+  } catch (error) {
+    console.error("Error en GET /api/condominos/[id]:", error);
+    return NextResponse.json(
+      { success: false, message: "Error interno del servidor." },
+      { status: 500 }
+    );
+  }
+}
+
+// 🔹 PUT: Actualizar condómino
+export async function PUT(req, { params }) {
+  try {
+    const { id } = await params;
+    const data = await req.json();
+    const {
+      tipoDocumento,
+      nombreCompleto,
+      fechaNacimiento,
+      numeroTelefono,
+      fechaEntrada,
+      fechaSalida,
+    } = data;
+
+    if (
+      !tipoDocumento ||
+      !nombreCompleto ||
+      !fechaNacimiento ||
+      !numeroTelefono ||
+      !fechaEntrada
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Faltan campos requeridos." },
+        { status: 400 }
+      );
+    }
 
     await conectarBaseDeDatos();
 
-    let query = {
-      _id: new Mongoose.Types.ObjectId(id),
-    };
+    const condomino = await Condomino.findById(id);
+    if (!condomino) {
+      return NextResponse.json(
+        { success: false, message: "Condómino no encontrado." },
+        { status: 404 }
+      );
+    }
 
-    const condominos = await Condomino.find(query).select(
-      "nombreCompleto numeroDocumento tipoDocumento fechaEntrada fechaSalida activo fechaNacimiento correoElectronico numeroTelefono",
-    );
+    condomino.tipoDocumento = tipoDocumento;
+    condomino.nombreCompleto = nombreCompleto;
+    condomino.fechaNacimiento = new Date(fechaNacimiento);
+    condomino.numeroTelefono = numeroTelefono;
+    condomino.fechaEntrada = new Date(fechaEntrada);
+    condomino.fechaSalida = fechaSalida ? new Date(fechaSalida) : null;
 
-    console.log(condominos);
-
-    const found = condominos.at(0);
-
-    console.log("FOUND!!!", found);
+    await condomino.save();
 
     return NextResponse.json({
       success: true,
-      found,
+      message: "Condómino actualizado exitosamente.",
+      condomino,
     });
   } catch (error) {
-    console.error("Error en GET /api/condominos:", error);
+    console.error("Error en PUT /api/condominos/[id]:", error);
     return NextResponse.json(
       { success: false, message: "Error interno del servidor." },
-      { status: 500 },
+      { status: 500 }
+    );
+  }
+}
+
+// 🔹 DELETE: Eliminar condómino
+export async function DELETE(req, { params }) {
+  try {
+    const { id } = await params;
+    await conectarBaseDeDatos();
+    const eliminado = await Condomino.findByIdAndDelete(id);
+
+    if (!eliminado) {
+      return NextResponse.json(
+        { success: false, message: "Condómino no encontrado." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Condómino eliminado exitosamente.",
+    });
+  } catch (error) {
+    console.error("Error en DELETE /api/condominos/[id]:", error);
+    return NextResponse.json(
+      { success: false, message: "Error interno del servidor." },
+      { status: 500 }
     );
   }
 }
