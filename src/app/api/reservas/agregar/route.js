@@ -1,3 +1,4 @@
+// src/app/api/reservas/agregar/route.js
 //Endpoint para crear una nueva reserva
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Reserva from "@/modelos/Reserva";

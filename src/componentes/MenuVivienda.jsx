@@ -1,3 +1,5 @@
+// src/componentes/MenuVivienda.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -58,7 +60,7 @@ const ESTRUCTURA_MENU = [
     { 
       titulo: 'Condóminos', 
       tipo: 'nav',
-      href: '/usuarioVivienda/condominos/buscar' 
+      href: '/usuarioVivienda/condominos' 
     },
     { 
       titulo: 'Viviendas', 

@@ -1,3 +1,5 @@
+// src/app/api/viviendas/buscar-viviendas/route.js
+
 //Endpoint para obtener todas las viviendas
 import { NextResponse } from 'next/server';
 import { conectarBaseDeDatos } from '@/lib/mongodb';
