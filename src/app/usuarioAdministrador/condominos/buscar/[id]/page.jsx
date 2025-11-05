@@ -2,240 +2,316 @@
 
 "use client";
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-export default function AgregarCondomino() {
-  const params = useParams();
+export default function EditarCondomino() {
+  const { id } = useParams();
+  const router = useRouter();
 
-  const [tipoDocumento, setTipoDocumento] = useState("");
-  const [numeroDocumento, setNumeroDocumento] = useState("");
-  const [nombreCompleto, setNombreCompleto] = useState("");
-  const [fechaNacimiento, setFechaNacimiento] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [fechaEntrada, setFechaEntrada] = useState("");
-  const [fechaSalida, setFechaSalida] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [formData, setFormData] = useState({
+    tipoDocumento: "",
+    numeroDocumento: "",
+    nombreCompleto: "",
+    fechaNacimiento: "",
+    correoElectronico: "",
+    numeroTelefono: "",
+    fechaEntrada: "",
+    fechaSalida: "",
+  });
+
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function fetchDetails() {
-    const response = await fetch(`/api/condominos/${params.id}`);
-    const data = await response.json();
-
-    const condomino = data.found;
-
-    setTipoDocumento(condomino.tipoDocumento);
-    setNumeroDocumento(condomino.numeroDocumento);
-    setNombreCompleto(condomino.nombreCompleto);
-    setFechaNacimiento(condomino.fechaNacimiento);
-    setCorreo(condomino.correoElectronico);
-    setTelefono(condomino.numeroTelefono);
-    setFechaEntrada(condomino.fechaEntrada);
-    setFechaSalida(condomino.fechaSalida);
-  }
-
+  // 📥 Cargar datos del condómino
   useEffect(() => {
-    fetchDetails();
-  }, []);
+    async function fetchData() {
+      try {
+        const res = await fetch(`/api/condominos/${id}`);
+        const data = await res.json();
+        if (data.success) {
+          const c = data.condomino;
+          setFormData({
+            tipoDocumento: c.tipoDocumento || "",
+            numeroDocumento: c.numeroDocumento || "",
+            nombreCompleto: c.nombreCompleto || "",
+            fechaNacimiento: c.fechaNacimiento
+              ? new Date(c.fechaNacimiento).toISOString().split("T")[0]
+              : "",
+            correoElectronico: c.correoElectronico || "",
+            numeroTelefono: c.numeroTelefono || "",
+            fechaEntrada: c.fechaEntrada
+              ? new Date(c.fechaEntrada).toISOString().split("T")[0]
+              : "",
+            fechaSalida: c.fechaSalida
+              ? new Date(c.fechaSalida).toISOString().split("T")[0]
+              : "",
+          });
+        } else {
+          setMessage("❌ Error al obtener datos del condómino.");
+        }
+      } catch (err) {
+        console.error(err);
+        setMessage("❌ Error de conexión al cargar datos.");
+      }
+    }
 
-  const selectTextColor =
-    tipoDocumento === ""
-      ? "text-[var(--Mi-gris)]"
-      : "text-[var(--Mi-cafe-oscuro)]";
+    if (id) fetchData();
+  }, [id]);
+
+  // 🔍 Validaciones
+  const getFormErrors = (data) => {
+    const newErrors = {};
+    if (!data.tipoDocumento)
+      newErrors.tipoDocumento = "Selecciona un tipo de documento.";
+    if (!data.numeroDocumento)
+      newErrors.numeroDocumento = "El número de documento es obligatorio.";
+    if (!data.nombreCompleto)
+      newErrors.nombreCompleto = "El nombre completo es obligatorio.";
+    if (!data.fechaNacimiento)
+      newErrors.fechaNacimiento = "La fecha de nacimiento es obligatoria.";
+    if (!data.correoElectronico)
+      newErrors.correoElectronico = "El correo electrónico es obligatorio.";
+    if (!data.numeroTelefono)
+      newErrors.numeroTelefono = "El número de teléfono es obligatorio.";
+    if (!data.fechaEntrada)
+      newErrors.fechaEntrada = "La fecha de entrada es obligatoria.";
+    return newErrors;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = getFormErrors(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/condominos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage("✅ Cambios guardados exitosamente.");
+      } else {
+        setMessage(`❌ ${data.message || "Error al guardar cambios."}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Error al guardar cambios.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("¿Seguro que deseas eliminar este condómino?")) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/condominos/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        alert("🗑️ Condómino eliminado exitosamente.");
+        router.push("/usuarioAdministrador/condominos/buscar");
+      } else {
+        setMessage(`❌ ${data.message || "Error al eliminar."}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Error al eliminar condómino.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderError = (field) =>
+    touched[field] && errors[field] ? (
+      <p className="text-[var(--Mi-rojo)] text-sm mt-1">{errors[field]}</p>
+    ) : null;
 
   return (
     <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10">
       <div className="bg-[var(--Mi-blanco)] w-full max-w-2xl rounded-2xl shadow-2xl p-6 sm:p-8">
         <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] mb-8 text-left">
-          Datos personales
+          Datos Personales
         </h1>
 
-        <form className="flex flex-col space-y-5 Mi_texto_20">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col space-y-5 Mi_texto_20"
+        >
+          {/* Tipo de documento (bloqueado) */}
           <div className="flex flex-col">
-            <label
-              htmlFor="tipoDocumento"
-              className="mb-1 text-[var(--Mi-cafe-oscuro)]"
-            >
-              Tipo de documento:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Tipo de Documento:
             </label>
             <select
-              id="tipoDocumento"
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${selectTextColor} ${errors.tipoDocumento ? "border-red-500" : ""}`}
-              value={tipoDocumento}
-              onChange={(e) => setTipoDocumento(e.target.value)}
+              name="tipoDocumento"
+              value={formData.tipoDocumento}
+              disabled
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] bg-gray-100 cursor-not-allowed"
             >
-              <option value="" disabled>
-                Seleccione una opción:
-              </option>
+              <option value="">Seleccione una opción</option>
               <option value="DPI">DPI</option>
               <option value="Pasaporte">Pasaporte</option>
             </select>
-            {errors.tipoDocumento && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.tipoDocumento}
-              </span>
-            )}
+            {renderError("tipoDocumento")}
           </div>
 
+          {/* Número de documento (bloqueado) */}
           <div className="flex flex-col">
-            <label htmlFor="numeroDocumento" className="mb-1">
-              Número de documento:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Número de Documento:
             </label>
             <input
-              id="numeroDocumento"
               type="text"
-              placeholder="0000000000000"
-              value={numeroDocumento}
-              onChange={(e) => setNumeroDocumento(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.numeroDocumento ? "border-red-500" : ""}`}
+              name="numeroDocumento"
+              value={formData.numeroDocumento}
+              readOnly
+              disabled
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] bg-gray-100 cursor-not-allowed"
             />
-            {errors.numeroDocumento && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.numeroDocumento}
-              </span>
-            )}
+            {renderError("numeroDocumento")}
           </div>
 
+          {/* Nombre completo */}
           <div className="flex flex-col">
-            <label htmlFor="nombreCompleto" className="mb-1">
-              Nombre completo:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Nombre Completo:
             </label>
             <input
-              id="nombreCompleto"
               type="text"
-              placeholder="Bruce Lee"
-              value={nombreCompleto}
-              onChange={(e) => setNombreCompleto(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.nombreCompleto ? "border-red-500" : ""}`}
+              name="nombreCompleto"
+              value={formData.nombreCompleto}
+              onChange={handleChange}
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
-            {errors.nombreCompleto && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.nombreCompleto}
-              </span>
-            )}
+            {renderError("nombreCompleto")}
           </div>
 
+          {/* Fecha nacimiento */}
           <div className="flex flex-col">
-            <label htmlFor="fechaNacimiento" className="mb-1">
-              Fecha de nacimiento:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Fecha de Nacimiento:
             </label>
             <input
-              id="fechaNacimiento"
               type="date"
-              value={new Date(fechaNacimiento).toLocaleDateString("en-CA")}
-              onChange={(e) => setFechaNacimiento(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaNacimiento ? "border-red-500" : ""}`}
+              name="fechaNacimiento"
+              value={formData.fechaNacimiento}
+              onChange={handleChange}
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
-            {errors.fechaNacimiento && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.fechaNacimiento}
-              </span>
-            )}
+            {renderError("fechaNacimiento")}
           </div>
 
+          {/* Correo electrónico (bloqueado) */}
           <div className="flex flex-col">
-            <label htmlFor="correo" className="mb-1">
-              Correo electrónico:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Correo Electrónico:
             </label>
             <input
-              id="correo"
               type="email"
-              placeholder="brucelee@yahoo.com"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.correo ? "border-red-500" : ""}`}
+              name="correoElectronico"
+              value={formData.correoElectronico}
+              readOnly
+              disabled
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] bg-gray-100 cursor-not-allowed"
             />
-            {errors.correo && (
-              <span className="text-red-500 text-sm mt-1">{errors.correo}</span>
-            )}
+            {renderError("correoElectronico")}
           </div>
 
+          {/* Número teléfono */}
           <div className="flex flex-col">
-            <label htmlFor="telefono" className="mb-1">
-              Número de teléfono:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Número de Teléfono:
             </label>
             <input
-              id="telefono"
               type="text"
-              placeholder="00000000"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.telefono ? "border-red-500" : ""}`}
+              name="numeroTelefono"
+              value={formData.numeroTelefono}
+              onChange={handleChange}
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
-            {errors.telefono && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.telefono}
-              </span>
-            )}
+            {renderError("numeroTelefono")}
           </div>
 
+          {/* Fecha entrada */}
           <div className="flex flex-col">
-            <label htmlFor="fechaEntrada" className="mb-1">
-              Fecha de entrada:*
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Fecha de Entrada:
             </label>
             <input
-              id="fechaEntrada"
               type="date"
-              value={new Date(fechaEntrada).toLocaleDateString("en-CA")}
-              onChange={(e) => setFechaEntrada(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaEntrada ? "border-red-500" : ""}`}
+              name="fechaEntrada"
+              value={formData.fechaEntrada}
+              onChange={handleChange}
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
-            {errors.fechaEntrada && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.fechaEntrada}
-              </span>
-            )}
+            {renderError("fechaEntrada")}
           </div>
 
+          {/* Fecha salida */}
           <div className="flex flex-col">
-            <label htmlFor="fechaSalida" className="mb-1">
-              Fecha de salida:
+            <label className="mb-1 text-[var(--Mi-cafe-oscuro)]">
+              Fecha de Salida:
             </label>
             <input
-              id="fechaSalida"
               type="date"
-              value={new Date(fechaSalida).toLocaleDateString("en-CA")}
-              onChange={(e) => setFechaSalida(e.target.value)}
-              className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${errors.fechaSalida ? "border-red-500" : ""}`}
+              name="fechaSalida"
+              value={formData.fechaSalida}
+              onChange={handleChange}
+              className="border border-[var(--Mi-gris)] rounded-lg p-3 text-[var(--Mi-cafe-oscuro)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
-            {errors.fechaSalida && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.fechaSalida}
-              </span>
-            )}
           </div>
 
-          {submitMessage && (
+          {/* Mensaje */}
+          {message && (
             <div
-              className={`text-center p-3 rounded-lg ${submitMessage.includes("exitosamente") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+              className={`text-center p-3 rounded-lg ${
+                message.startsWith("✅")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
             >
-              {submitMessage}
+              {message}
             </div>
           )}
 
-          <div className="flex justify-center pt-6 gap-8">
+          {/* Botones */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-lg shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              disabled={loading}
+              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-3 rounded-xl shadow-md transition-opacity ${
+                loading ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+              }`}
             >
-              {isSubmitting ? "Guardando..." : "Guardar"}
+              {loading ? "Guardando..." : "Guardar cambios"}
             </button>
+
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-lg shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+              type="button"
+              onClick={handleDelete}
+              disabled={loading}
+              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-3 rounded-xl shadow-md transition-opacity ${
+                loading ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+              }`}
             >
-              Editar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 sm:px-8 sm:py-3 rounded-lg shadow-md transition-opacity ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
-            >
-              Eliminar
+              {loading ? "Eliminando..." : "Eliminar condómino"}
             </button>
           </div>
         </form>
