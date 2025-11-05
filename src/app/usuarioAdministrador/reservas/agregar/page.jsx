@@ -48,7 +48,7 @@ export default function AddReservaPage() {
     return (
         // Formulario para agregar reserva usando los estilos globales de la aplicación
         <div className="flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
-            <div className="flex flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
+            <div className="flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
                 <div className="flex flex-col gap-6">
                     <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
                         <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
