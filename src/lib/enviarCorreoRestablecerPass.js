@@ -5,6 +5,11 @@ import jwt from "jsonwebtoken";
 import { enviarCorreo } from "./enviarCorreo";
 
 export async function enviarCorreoRestablecerPass(usuario, correo) {
+  // ✅ Validación opcional de variables de entorno (para evitar errores silenciosos)
+  if (!process.env.CONTRASENNA_JWT || !process.env.NEXT_PUBLIC_BASE_URL) {
+    throw new Error("Faltan variables de entorno necesarias para el envío de correo.");
+  } // <-- línea agregada
+
   // Crear token temporal (10 minutos)
   const token = jwt.sign({ usuario }, process.env.CONTRASENNA_JWT, {
     expiresIn: "10m",
