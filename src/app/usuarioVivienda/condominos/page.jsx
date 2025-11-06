@@ -45,7 +45,7 @@ export default function VerMisDatos() {
         if (!condominoId) {
           // ESTE ES EL ERROR SI NO SE ENCUENTRA UN "Propietario"
           throw new Error(
-            "No se encontró un condómino con 'Tipo: Propietario' vinculado a su vivienda."
+            "No existe un condómino 'Tipo: Propietario' vinculado a su vivienda."
           );
         }
 
@@ -105,11 +105,11 @@ export default function VerMisDatos() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-10 px-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg text-center shadow-md max-w-2xl">
+        <div className="bg-[var(--Mi-blanco)] text-[var(--Mi-cafe-oscuro)] px-6 py-4 rounded-lg text-center shadow-md max-w-2xl">
           <strong className="font-bold Mi_texto_negrita_20">Error:</strong>
           <span className="block Mi_texto_20 mt-2"> {error}</span>
           <p className="Mi_texto_pequeño_16 mt-3 text-gray-700">
-            Por favor, contacte al administrador si cree que esto es un error.
+            Si piensa que es un error, por favor contacte a NexTech.
           </p>
         </div>
       </div>
