@@ -59,7 +59,7 @@ export default function VerMisDatos() {
         const dataCondomino = await resCondomino.json();
 
         // 3. Poblar el estado con los datos encontrados
-        const condomino = dataCondomino.found;
+        const condomino = dataCondomino.condomino || dataCondomino.found;
         if (condomino) {
           setTipoDocumento(condomino.tipoDocumento || "");
           setNumeroDocumento(condomino.numeroDocumento || "");
