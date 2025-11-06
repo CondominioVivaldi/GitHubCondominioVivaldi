@@ -2,22 +2,34 @@
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Condomino from "@/modelos/Condomino";
+import mongoose from "mongoose";
 
 // 🔹 GET: Obtener condómino por ID
 export async function GET(req, { params }) {
   try {
-    const { id } = await params;
+    const { id } = await params; //const { id } = params no funciona
     await conectarBaseDeDatos();
-    const condomino = await Condomino.findById(id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "ID de condómino inválido." },
+        { status: 400 }
+      );
+    }
+
+    const condomino = await Condomino.findById(new mongoose.Types.ObjectId(id));
 
     if (!condomino) {
       return NextResponse.json(
-        { success: false, message: "Condómino no encontrado." },
+        {
+          success: false,
+          message: `No se encontró el condómino con ID: ${id}.`,
+        },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, condomino });
+    return NextResponse.json({ success: true, found: condomino }, { status: 200 });
   } catch (error) {
     console.error("Error en GET /api/condominos/[id]:", error);
     return NextResponse.json(
@@ -30,7 +42,7 @@ export async function GET(req, { params }) {
 // 🔹 PUT: Actualizar condómino
 export async function PUT(req, { params }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const data = await req.json();
     const {
       tipoDocumento,
@@ -56,7 +68,14 @@ export async function PUT(req, { params }) {
 
     await conectarBaseDeDatos();
 
-    const condomino = await Condomino.findById(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "ID de condómino inválido." },
+        { status: 400 }
+      );
+    }
+
+    const condomino = await Condomino.findById(new mongoose.Types.ObjectId(id));
     if (!condomino) {
       return NextResponse.json(
         { success: false, message: "Condómino no encontrado." },
@@ -90,9 +109,19 @@ export async function PUT(req, { params }) {
 // 🔹 DELETE: Eliminar condómino
 export async function DELETE(req, { params }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await conectarBaseDeDatos();
-    const eliminado = await Condomino.findByIdAndDelete(id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "ID de condómino inválido." },
+        { status: 400 }
+      );
+    }
+
+    const eliminado = await Condomino.findByIdAndDelete(
+      new mongoose.Types.ObjectId(id)
+    );
 
     if (!eliminado) {
       return NextResponse.json(
