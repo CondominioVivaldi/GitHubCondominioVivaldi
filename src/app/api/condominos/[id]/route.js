@@ -5,9 +5,11 @@ import Condomino from "@/modelos/Condomino";
 import mongoose from "mongoose";
 
 // 🔹 GET: Obtener condómino por ID
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   try {
-    const { id } = await params; //const { id } = params no funciona
+    // ✅ universal — funciona con params síncronos o asíncronos
+    const { id } = await Promise.resolve(context.params);
+
     await conectarBaseDeDatos();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -21,15 +23,12 @@ export async function GET(req, { params }) {
 
     if (!condomino) {
       return NextResponse.json(
-        {
-          success: false,
-          message: `No se encontró el condómino con ID: ${id}.`,
-        },
+        { success: false, message: `No se encontró el condómino con ID: ${id}.` },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, found: condomino }, { status: 200 });
+    return NextResponse.json({ success: true, condomino }, { status: 200 });
   } catch (error) {
     console.error("Error en GET /api/condominos/[id]:", error);
     return NextResponse.json(
@@ -38,6 +37,7 @@ export async function GET(req, { params }) {
     );
   }
 }
+
 
 // 🔹 PUT: Actualizar condómino
 export async function PUT(req, { params }) {
