@@ -4,13 +4,15 @@ import { NextResponse } from "next/server";
 import { verificarToken } from "@/lib/auth";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Usuario from "@/modelos/Usuario";
-import Vivienda from "@/modelos/Vivienda"; // <-- Importamos el modelo Vivienda
+import Vivienda from "@/modelos/Vivienda";
 
+// Asegura que esta función sea la exportación nombrada, como requiere Next.js App Router
 export async function GET(req) {
   try {
     // 1️⃣ Obtener el token desde la cookie
     const token = req.cookies.get("token")?.value;
     if (!token) {
+      // Devolver un 401 si no hay token
       return NextResponse.json(
         { success: false, message: "No se encontró token." },
         { status: 401 }
@@ -40,20 +42,20 @@ export async function GET(req) {
       );
     }
 
-    const nombreUsuario = usuarioLogueado.usuario; // Ej: "Apto101"
+    const nombreUsuario = usuarioLogueado.usuario; // Ej: "vivienda001"
 
     // 4️⃣ Buscar la vivienda usando el nombre de usuario ("usuario" == "idVivienda")
+    // Nota: El ID de la vivienda de MongoDB no es el ID del usuario.
     const vivienda = await Vivienda.findOne({ idVivienda: nombreUsuario });
 
     if (!vivienda) {
-      // No se encontró una vivienda que coincida con el usuario
+      // Si no hay vivienda asociada, devolvemos success: true, pero sin viviendaId/condominoId
       return NextResponse.json({
         success: true,
         usuario: {
           id: usuarioLogueado._id,
-          usuario: usuarioLogueado.usuario,
+          usuario: usuarioLogueado.usuario, // Esto es el idVivienda que usará el frontend
           tipoUsuario: usuarioLogueado.tipoUsuario,
-          condominoId: null, // No hay vivienda, por lo tanto no hay condómino
         },
         message: "Usuario encontrado, pero no se encontró vivienda asociada.",
       });
@@ -69,25 +71,20 @@ export async function GET(req) {
     // 6️⃣ Extraer el ID del condómino (será null si no se encontró un Propietario)
     const condominoId = propietario ? propietario.condominoId : null;
 
-    // 7️⃣ Devolver los datos del usuario + el condominoId (sea null o un ID)
+    // 7️⃣ Devolver los datos del usuario + las referencias necesarias
     return NextResponse.json({
       success: true,
       usuario: {
         id: usuarioLogueado._id,
-        usuario: usuarioLogueado.usuario,
+        usuario: usuarioLogueado.usuario, // ID de vivienda (ej: "vivienda001")
         tipoUsuario: usuarioLogueado.tipoUsuario,
-        viviendaId: vivienda._id,
-        condominoId: condominoId, // Esto es lo que el frontend necesita
+        viviendaId: vivienda._id, // El ID de MongoDB de la vivienda
+        condominoId: condominoId,
       },
     });
   } catch (error) {
     console.error("Error en /api/usuarios/actual:", error);
-    // Manejo de error si el modelo Vivienda no se importó correctamente
-    if (error.message.includes("Schema hasn't been registered")) {
-      console.error(
-        "Asegúrate de importar el modelo Vivienda en este archivo."
-      );
-    }
+    // Aseguramos que si hay un error en el servidor, devolvemos un JSON válido (con status 500)
     return NextResponse.json(
       { success: false, message: "Error interno del servidor." },
       { status: 500 }
