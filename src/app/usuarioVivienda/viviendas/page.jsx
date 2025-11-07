@@ -1,4 +1,4 @@
-// src/app/usuarioAdministrador/viviendas/buscar/page.jsx
+// src/app/usuarioVivienda/viviendas/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -125,7 +125,7 @@ export default function AgregarVivienda() {
       <div className="bg-[var(--Mi-blanco)] w-[400px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in h-[162px]">
         <div className="flex flex-col">
           <label className="mb-1">
-            Ingrese ID vivienda
+            Ingrese ID vivienda:
           </label>
           <select
             onChange={(e) => {
