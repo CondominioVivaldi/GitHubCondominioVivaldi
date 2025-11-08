@@ -54,7 +54,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Ingrese ID vivienda
+                                    Ingrese ID vivienda:
                                 </label>
                                 <input
                                     type="text"
@@ -71,7 +71,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Fecha de Reserva
+                                    Fecha de Reserva:
                                 </label>
                                 <Calendar
                                     name="fechaReserva"
@@ -87,7 +87,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Amenidad disponible
+                                    Amenidad disponible:
                                 </label>
                                 <input
                                     type="text"
@@ -104,7 +104,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Horarios disponibles
+                                    Horarios disponibles:
                                 </label>
                                 <input
                                     type="text"

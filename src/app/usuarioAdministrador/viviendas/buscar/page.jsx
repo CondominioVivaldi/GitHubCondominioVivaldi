@@ -230,7 +230,7 @@ confirmado = window.confirm("¿Está seguro de que desea eliminar esta vivienda?
       <div className="bg-[var(--Mi-blanco)] w-full lg:w-[400px] lg:max-w-sm rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
         <div className="flex flex-col relative">
           <label htmlFor="searchVivienda" className="mb-1 Mi_texto_20">
-            Ingrese ID vivienda
+            Ingrese ID vivienda:
           </label>
           {/* 2. Componente Typeahead simple */}
           <input
