@@ -99,7 +99,7 @@ export default function UsuarioViviendaUsuariosPage() {
         <h1 className="Mi_H2_40 mb-6 text-center">Usuario</h1>
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col">
-            <label className="Mi_texto_20 font-semibold mb-1">Usuario actual</label>
+            <label className="Mi_texto_20 font-semibold mb-1">Usuario actual:</label>
             <input
               type="text"
               value={usuario?.usuario || ""}
@@ -115,7 +115,7 @@ export default function UsuarioViviendaUsuariosPage() {
         <h1 className="Mi_H2_40 mb-6 text-center">Cambiar contraseña</h1>
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col">
-            <label className="Mi_texto_20 font-semibold mb-1">Nueva contraseña</label>
+            <label className="Mi_texto_20 font-semibold mb-1">Nueva contraseña:</label>
             <input
               type="password"
               value={nuevaPass}
@@ -124,7 +124,7 @@ export default function UsuarioViviendaUsuariosPage() {
             />
           </div>
           <div className="flex flex-col">
-            <label className="Mi_texto_20 font-semibold mb-1">Confirmar nueva contraseña</label>
+            <label className="Mi_texto_20 font-semibold mb-1">Confirmar nueva contraseña:</label>
             <input
               type="password"
               value={confirmarPass}

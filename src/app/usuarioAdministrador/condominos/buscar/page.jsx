@@ -88,7 +88,7 @@ export default function BuscarCondominos() {
                 setCriterio(value);
                 if (value === "Todos") {
                   setBusqueda("");
-                  fetchCondominos("Todos", ""); // 🔹 Mostrar todos los condominos
+                  fetchCondominos("Todos", ""); // 🔹 Mostrar todos los condóminos
                   setHasSearched(true);
                 }
               }}
@@ -155,7 +155,7 @@ export default function BuscarCondominos() {
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="text-center py-8">
             <p className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-              No se encontraron condominos con los criterios de búsqueda.
+              No se encontraron condóminos con los criterios de búsqueda.
             </p>
           </div>
         </div>
