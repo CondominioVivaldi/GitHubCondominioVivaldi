@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AgregarEliminarUsuarios() {
   const [viviendasVinculadas, setViviendasVinculadas] = useState([]);
+  const [usuariosVinculados, setUsuariosVinculados] = useState([]);
   const [formData, setFormData] = useState({
     usuario: "",
     contraseña: "",
@@ -25,6 +26,18 @@ export default function AgregarEliminarUsuarios() {
       }
     }
     fetchViviendas();
+
+    // Obtener los usuarios vinculados desde el backend
+    async function fetchUsuarios() {
+      try {
+        const response = await fetch("/api/usuarios/buscar-usuarios");
+        const data = await response.json();
+        setUsuariosVinculados(data.usuarios || []);
+      }
+      catch (error) {
+        console.error("Error al obtener usuarios vinculados:", error);
+      }
+    }
   }
 , []);
 
@@ -65,7 +78,7 @@ export default function AgregarEliminarUsuarios() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          usuario: formData.usuario,
+          usuario: formData.vivienda,
           correoElectronico: formData.correoElectronico,
           contraseña: formData.contraseña,
           vivienda: formData.vivienda
@@ -82,16 +95,6 @@ export default function AgregarEliminarUsuarios() {
   const handleDelete = async (e) => {
   e.preventDefault();
 
-  // Buscar la vivienda seleccionada
-  const viviendaSeleccionada = viviendasVinculadas.find(
-    (v) => v._id === formData.vivienda
-  );
-
-  if (!viviendaSeleccionada) {
-    setMensaje("Seleccione una vivienda válida.");
-    return;
-  }
-
   try {
     const response = await fetch("/api/usuarios/eliminar-usuario", {
       method: "DELETE",
@@ -99,7 +102,7 @@ export default function AgregarEliminarUsuarios() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        idVivienda: viviendaSeleccionada.idVivienda
+        idVivienda: formData.usuario
       })
     });
 
@@ -116,21 +119,19 @@ export default function AgregarEliminarUsuarios() {
      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
         <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[722px] flex flex-col items-center">
         <form onSubmit={handleSubmit} className="space-y-4 w-[553px]">
-          <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] text-left mb-6">
+          <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] text-center mb-6">
             Crear Usuario
           </h1>
             <div className="flex items-center space-x-4">
             <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
                 Vivienda
             </label>
-            <select className="w-full border border-gray-300 p-2 rounded" name="vivienda" value={formData.vivienda} onChange={handleChange} required>
-                <option value="">Seleccione una vivienda</option>
-                {viviendasVinculadas.map((vivienda) => (
-                    <option key={vivienda._id} value={vivienda._id}>
-                        {vivienda.idVivienda}
-                    </option>
-                ))}
-            </select>
+            <input type="text" 
+            name="vivienda"
+            value={formData.vivienda}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded"
+            required/>
             </div>
             <div className="flex items-center space-x-4"> 
             <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
@@ -178,26 +179,24 @@ export default function AgregarEliminarUsuarios() {
               Crear Usuario
             </button>
           </form>
-        {mensaje && <p className="mt-4 text-center text-[var(--Mi-cafe-oscuro)]">{mensaje}</p>}
+          {mensaje && <p className="mt-4 text-center text-[var(--Mi-cafe-oscuro)]">{mensaje}</p>}
         </div>
         
         <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[722px] flex flex-col items-center">
         <form onSubmit={handleDelete} className="space-y-4 w-[553px]">
-            <h1 className="Mi_H4_24 text-[var(--Mi-cafe-oscuro)] text-left mb-6">
+            <h1 className="Mi_H2_40 text-[var(--Mi-cafe-oscuro)] text-center mb-6">
             Eliminar Usuario
             </h1>
             <div className="flex items-center space-x-4">
             <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1 w-1/3">
-                Vivienda
+                Usuario
             </label>
-            <select className="w-full border border-gray-300 p-2 rounded" name="vivienda" value={formData.vivienda} onChange={handleChange} required>
-                <option value="">Seleccione una vivienda</option>
-                {viviendasVinculadas.map((vivienda) => (
-                    <option key={vivienda._id} value={vivienda._id}>
-                        {vivienda.idVivienda}
-                    </option>
-                ))}
-            </select>
+            <input type="text" 
+            name="usuario"
+            value={formData.usuario}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded"
+            required/>
             </div>
             <button
               type="submit"

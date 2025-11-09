@@ -16,15 +16,16 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    // Verificar si la vivienda ya tiene un usuario asociado
-    const viviendaExistente = await Vivienda.findById(vivienda);
+    // Verificar si la vivienda ya tiene un usuario asociado por medio de su idVivienda
+    const viviendaExistente = await Vivienda.findOne({ idVivienda: vivienda });
     if (!viviendaExistente) {
       return new Response(
         JSON.stringify({ mensaje: "La vivienda no existe." }),
         { status: 400 }
       );
     }
-    const usuarioViviendaExistente = await Usuario.findOne({ vivienda });
+
+    const usuarioViviendaExistente = await Usuario.findOne({ usuario: vivienda });
     if (usuarioViviendaExistente) {
       return new Response(
         JSON.stringify({ mensaje: "La vivienda ya tiene un usuario asociado." }),
@@ -36,7 +37,7 @@ export async function POST(request) {
       usuario,
       contraseña,
       tipoUsuario: "vivienda",
-      vivienda,
+      vivienda: viviendaExistente._id,
       correoElectronico: correoElectronico
     });
     await nuevoUsuario.save();

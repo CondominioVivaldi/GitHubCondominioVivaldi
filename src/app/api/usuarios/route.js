@@ -7,7 +7,7 @@ export async function GET(req) {
     await conectarBaseDeDatos();
 
     const usuarios = await Usuario.find({})
-      .select("usuario correoElectronico tipoUsuario activo")
+      .select("usuario correoElectronico tipoUsuario activo vivienda")
       .sort({ usuario: 1 });
 
     return NextResponse.json({
