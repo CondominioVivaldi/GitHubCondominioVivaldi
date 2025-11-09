@@ -618,10 +618,7 @@ export default function AgregarReservaPage() {
             <div className="mt-6 p-4 rounded-lg text-[var(--Mi-cafe-oscuro)]">
               <p className="Mi_texto_negrita_20 mb-1">Nota:</p>
               <p className="Mi_texto_pequeño_16">
-                Las reservas tienen duración de una hora.
-              </p>
-              <p className="Mi_texto_pequeño_16">
-                Tu usuario no tiene límite de reservas.
+                Cada reserva tiene duración de una hora.
               </p>
             </div>
           </FormCard>
