@@ -1,3 +1,5 @@
+// src/componentes/MenuAdministrador.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -25,7 +27,7 @@ const ESTRUCTURA_MENU = [
   // Categoría 2
   [
     { 
-      titulo: 'Estados de cuenta', 
+      titulo: 'Estados de cuenta🔒', 
       tipo: 'desplegable', 
       basePath: '/usuarioAdministrador/estadosDeCuenta', 
       opciones: [
@@ -46,7 +48,7 @@ const ESTRUCTURA_MENU = [
       ] 
     },
     { 
-      titulo: 'Reservas', 
+      titulo: 'Reservas🚧​', 
       tipo: 'desplegable', 
       basePath: '/usuarioAdministrador/reservas', 
       opciones: [

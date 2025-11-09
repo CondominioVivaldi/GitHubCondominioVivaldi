@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/condominos/buscar/page.jsx
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -21,10 +23,13 @@ export default function BuscarCondominos() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (searchCriterio && searchBusqueda) {
+      if (searchCriterio === "Todos") {
+        // No agregamos parámetros -> devuelve todos
+      } else if (searchCriterio && searchBusqueda) {
         params.append("criterio", searchCriterio);
         params.append("busqueda", searchBusqueda);
       }
+
 
       const response = await fetch(`/api/condominos?${params}`);
       const data = await response.json();
@@ -46,9 +51,6 @@ export default function BuscarCondominos() {
     }
   };
 
-  useEffect(() => {
-    fetchCondominos();
-  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -61,21 +63,18 @@ export default function BuscarCondominos() {
     setCriterio("");
     setBusqueda("");
     setHasSearched(false);
-    fetchCondominos();
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("es-GT");
+    setCondominos([]);
   };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 sm:px-8 py-10 space-y-8 bg-mi-gradiante-blanco">
+      {/* Formulario de búsqueda */}
       <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
         <form
           onSubmit={handleSearch}
           className="flex flex-col space-y-6 Mi_texto_20 text-[var(--Mi-cafe-oscuro)]"
         >
+          {/* Criterio */}
           <div className="flex flex-col">
             <label htmlFor="criterio" className="mb-1">
               Buscar por:*
@@ -85,12 +84,15 @@ export default function BuscarCondominos() {
               className={`border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)] ${selectTextColor}`}
               value={criterio}
               onChange={(e) => {
-                if (e.target.value === "Todos") {
-                  handleReset();
+                const value = e.target.value;
+                setCriterio(value);
+                if (value === "Todos") {
+                  setBusqueda("");
+                  fetchCondominos("Todos", ""); // 🔹 Mostrar todos los condóminos
+                  setHasSearched(true);
                 }
-
-                setCriterio(e.target.value);
               }}
+
             >
               <option value="" disabled style={{ color: "var(--Mi-gris)" }}>
                 Elegir...
@@ -107,6 +109,7 @@ export default function BuscarCondominos() {
             </select>
           </div>
 
+          {/* Búsqueda */}
           <div className="flex flex-col">
             <label htmlFor="busqueda" className="mb-1">
               Escribir ID / Nombre:*
@@ -122,6 +125,7 @@ export default function BuscarCondominos() {
             />
           </div>
 
+          {/* Botón */}
           <div className="flex justify-center gap-4">
             <button
               type="submit"
@@ -134,6 +138,7 @@ export default function BuscarCondominos() {
         </form>
       </div>
 
+      {/* Cargando */}
       {loading && (
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="flex justify-center items-center py-8">
@@ -145,27 +150,31 @@ export default function BuscarCondominos() {
         </div>
       )}
 
+      {/* Sin resultados */}
       {!loading && hasSearched && condominos.length === 0 && (
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="text-center py-8">
             <p className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-              No se encontraron condominos con los criterios de búsqueda.
+              No se encontraron condóminos con los criterios de búsqueda.
             </p>
           </div>
         </div>
       )}
 
-      {!loading && (!hasSearched || condominos.length > 0) && (
+      {/* Tabla de resultados */}
+      {!loading && hasSearched && condominos.length > 0 && (
         <div className="bg-[var(--Mi-blanco)] w-[700px] max-w-full rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in">
           <div className="mb-4">
             <p className="text-[var(--Mi-cafe-oscuro)] Mi_texto_20">
-              {initialLoad
-                ? "Cargando condominos..."
-                : `${condominos.length} condomino(s) encontrado(s)`}
+              {`${condominos.length} condomino(s) encontrado(s)`}
             </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="border border-[var(--Mi-cafe-oscuro)] rounded-lg overflow-hidden w-full">
+          <div
+            className={`overflow-x-auto overflow-y-auto ${
+              condominos.length > 5 ? "max-h-[300px]" : ""
+            }`}
+          >
+            <table className="border border-[var(--Mi-cafe-oscuro)] rounded-lg w-full">
               <thead className="bg-mi-gradiante-azul text-[var(--Mi-blanco)] Mi_texto_negrita_20 text-center">
                 <tr>
                   <th className="px-4 py-3">Nombre</th>
@@ -173,18 +182,14 @@ export default function BuscarCondominos() {
                 </tr>
               </thead>
               <tbody>
-                {condominos.map((condomino, i) => (
+                {condominos.map((condomino) => (
                   <tr
                     key={condomino._id}
-                    className={`${i % 2 === 0 ? "bg-mi-gradiante-blanco" : "bg-white"} text-[var(--Mi-cafe-oscuro)] Mi_texto_20 hover:bg-gray-50 pointer`}
+                    className="bg-mi-gradiante-blanco text-[var(--Mi-cafe-oscuro)] Mi_texto_20 hover:bg-gray-50 cursor-pointer"
                     onClick={() => router.push("buscar/" + condomino._id)}
                   >
-                    <td className="px-4 py-3 text-center">
-                      {condomino.nombreCompleto}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {condomino.numeroDocumento}
-                    </td>
+                    <td className="px-4 py-3 text-center">{condomino.nombreCompleto}</td>
+                    <td className="px-4 py-3 text-center">{condomino.numeroDocumento}</td>
                   </tr>
                 ))}
               </tbody>
@@ -192,6 +197,7 @@ export default function BuscarCondominos() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

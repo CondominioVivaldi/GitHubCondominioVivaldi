@@ -1,3 +1,5 @@
+// src/componentes/MenuVivienda.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -24,7 +26,7 @@ const ESTRUCTURA_MENU = [
   // Categoría 2
   [
     { 
-      titulo: 'Estados de cuenta', 
+      titulo: 'Estados de cuenta🔒', 
       tipo: 'nav', 
       href: '/usuarioVivienda/estadosDeCuenta' 
     },
@@ -34,7 +36,7 @@ const ESTRUCTURA_MENU = [
       href: '/usuarioVivienda/amenidades' 
     },
     { 
-      titulo: 'Reservas', 
+      titulo: 'Reservas🚧', 
       tipo: 'desplegable', 
       basePath: '/usuarioVivienda/reservas', // Ruta base para apertura automática
       opciones: [
@@ -58,7 +60,7 @@ const ESTRUCTURA_MENU = [
     { 
       titulo: 'Condóminos', 
       tipo: 'nav',
-      href: '/usuarioVivienda/condominos/buscar' 
+      href: '/usuarioVivienda/condominos' 
     },
     { 
       titulo: 'Viviendas', 

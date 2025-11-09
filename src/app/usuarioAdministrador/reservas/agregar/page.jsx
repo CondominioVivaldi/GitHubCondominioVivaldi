@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/reservas/agregar/page.jsx
+
 "use client";
 import Calendar from "./calendar";
 
@@ -46,13 +48,13 @@ export default function AddReservaPage() {
     return (
         // Formulario para agregar reserva usando los estilos globales de la aplicación
         <div className="flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
-            <div className="flex flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
+            <div className="flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
                 <div className="flex flex-col gap-6">
                     <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
                         <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Ingrese ID vivienda
+                                    Ingrese ID vivienda:
                                 </label>
                                 <input
                                     type="text"
@@ -69,7 +71,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Fecha de Reserva
+                                    Fecha de Reserva:
                                 </label>
                                 <Calendar
                                     name="fechaReserva"
@@ -85,7 +87,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Amenidad disponible
+                                    Amenidad disponible:
                                 </label>
                                 <input
                                     type="text"
@@ -102,7 +104,7 @@ export default function AddReservaPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
                             <div>
                                 <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Horarios disponibles
+                                    Horarios disponibles:
                                 </label>
                                 <input
                                     type="text"

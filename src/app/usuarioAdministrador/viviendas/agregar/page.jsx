@@ -302,7 +302,7 @@ export default function AgregarVivienda() {
             </div>
           )}
 
-          <div className="flex justify-end items-end pt-6 flex-col gap-8">
+          <div className="flex justify-end items-center pt-6 flex-col gap-8">
             <button
               type="button"
               onClick={addCondomino}

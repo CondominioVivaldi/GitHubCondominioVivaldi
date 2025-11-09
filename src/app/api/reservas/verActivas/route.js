@@ -1,3 +1,5 @@
+// src/app/api/reservas/verActivas/route.js
+
 import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb"; // Ajusta la ruta a tu archivo de conexión
 import Reserva from "@/modelos/Reserva"; // Ajusta la ruta a tu modelo

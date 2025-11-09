@@ -1,3 +1,5 @@
+// src/app/usuarioAdministrador/reclamos/pendientes/page.jsx
+
 "use client";
 import { useEffect, useState } from "react";
 

@@ -80,7 +80,7 @@ export default function inicioDeSesion() {
           >
             {/* Etiqueta: Nombre de usuario */}
             <label className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] block mb-2">
-              Nombre de usuario
+              Nombre de usuario:
             </label>
             <input
               type="text"
@@ -92,7 +92,7 @@ export default function inicioDeSesion() {
 
             {/* Etiqueta: Contraseña */}
             <label className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] block mb-2">
-              Contraseña
+              Contraseña:
             </label>
             <input
               type="password"
