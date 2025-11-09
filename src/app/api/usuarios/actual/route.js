@@ -9,17 +9,16 @@ import Vivienda from "@/modelos/Vivienda";
 // Asegura que esta función sea la exportación nombrada, como requiere Next.js App Router
 export async function GET(req) {
   try {
-    // 1️⃣ Obtener el token desde la cookie
+    // Obtener el token desde la cookie
     const token = req.cookies.get("token")?.value;
     if (!token) {
-      // Devolver un 401 si no hay token
       return NextResponse.json(
         { success: false, message: "No se encontró token." },
         { status: 401 }
       );
     }
 
-    // 2️⃣ Verificar el token y obtener el payload (que tiene el ID de usuario)
+    // Verificar el token y obtener el payload (que tiene el ID de usuario)
     const payload = await verificarToken(token);
     if (!payload || !payload.id) {
       return NextResponse.json(
@@ -30,7 +29,7 @@ export async function GET(req) {
 
     await conectarBaseDeDatos();
 
-    // 3️⃣ Buscar al usuario logueado para obtener su nombre de usuario
+    // Buscar al usuario logueado para obtener su nombre de usuario
     const usuarioLogueado = await Usuario.findById(payload.id).select(
       "usuario tipoUsuario"
     );
@@ -42,9 +41,9 @@ export async function GET(req) {
       );
     }
 
-    const nombreUsuario = usuarioLogueado.usuario; // Ej: "vivienda001"
+    const nombreUsuario = usuarioLogueado.usuario;
 
-    // 4️⃣ Buscar la vivienda usando el nombre de usuario ("usuario" == "idVivienda")
+    // Buscar la vivienda usando el nombre de usuario ("usuario" == "idVivienda")
     // Nota: El ID de la vivienda de MongoDB no es el ID del usuario.
     const vivienda = await Vivienda.findOne({ idVivienda: nombreUsuario });
 
@@ -61,17 +60,17 @@ export async function GET(req) {
       });
     }
 
-    // 5️⃣ Buscar al "Propietario" en el array "condominosVinculados"
+    // Buscar al "Propietario" en el array "condominosVinculados"
     const condominosVinculados = vivienda.condominosVinculados || [];
 
     const propietario = condominosVinculados.find(
       (c) => c.tipoInquilino === "Propietario"
     );
 
-    // 6️⃣ Extraer el ID del condómino (será null si no se encontró un Propietario)
+    // Extraer el ID del condómino (será null si no se encontró un Propietario)
     const condominoId = propietario ? propietario.condominoId : null;
 
-    // 7️⃣ Devolver los datos del usuario + las referencias necesarias
+    // Devolver los datos del usuario + las referencias necesarias
     return NextResponse.json({
       success: true,
       usuario: {

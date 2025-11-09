@@ -1,143 +1,657 @@
 // src/app/usuarioAdministrador/reservas/agregar/page.jsx
 
 "use client";
-import Calendar from "./calendar";
 
-import React, { useState } from "react";
-export default function AddReservaPage() {
-    const [formData, setFormData] = useState({
-        vivienda: "",
-        fechaReserva: "",
-        amenidad: "",
-        horaInicio: ""
-    });
-    const [mensaje, setMensaje] = useState("");
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        }); // src/app/usuarioAdministrador/reservas/agregar/page.jsx
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { CheckCircle, AlertCircle } from "lucide-react";
+
+// --- CONSTANTES Y UTILIDADES ---
+
+// Función para generar todos los horarios de 8 AM a 8 PM
+const generateAllHours = () => {
+  const hours = [];
+  for (let h = 8; h < 20; h++) {
+    const start = `${h.toString().padStart(2, '0')}:00`;
+    const end = `${(h + 1).toString().padStart(2, '0')}:00`;
+    // ID único para el horario
+    hours.push({ id: `h${h}`, time: `${start} - ${end}` });
+  }
+  return hours;
+};
+
+// Horarios base de 8 AM a 8 PM
+const ALL_HOURS = generateAllHours();
+
+/**
+ * Convierte un número de día (1-31) al formato YYYY-MM-DD para la base de datos.
+ * Nota: El Calendario está fijo en Enero 2025.
+ * @param {number} dayNumber
+ * @returns {string} Fecha en formato '2025-01-DD'
+ */
+const formatDayToDate = (dayNumber) => {
+    if (!dayNumber) return null;
+    return `2025-01-${String(dayNumber).padStart(2, '0')}`;
+}
+
+// Componente para una sección de formulario (tarjeta blanca)
+const FormCard = ({ children, title, className = "" }) => (
+  <div
+    className={`bg-white p-6 md:p-8 rounded-xl shadow-lg animate-fade-in mb-6 text-[var(--Mi-cafe-oscuro)] ${className}`}
+  >
+    {title && (
+      <h3 className="Mi_H4_24 mb-4 border-b pb-2 border-gray-200">{title}</h3>
+    )}
+    {children}
+  </div>
+);
+
+// --- COMPONENTE DE CALENDARIO ---
+
+/**
+ * Muestra el calendario con la disponibilidad.
+ * @param {object} props 
+ * @param {string} props.selectedAmenidadId - ID de la amenidad seleccionada.
+ * @param {number | null} props.selectedDate - Día del mes seleccionado.
+ * @param {function} props.setSelectedDate - Setter para la fecha seleccionada.
+ * @param {object} props.monthReservations - Mapa de reservas por fecha: { 'YYYY-MM-DD': ['h10', 'h11'], ... }
+ */
+const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, monthReservations }) => {
+  const [currentMonth] = useState(new Date(2025, 0)); // Enero 2025 (Fijo por ahora)
+
+  const daysOfWeek = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
+  const monthName = currentMonth.toLocaleString("es-ES", {
+    month: "long",
+    year: "numeric",
+  });
+  const daysInMonth = 31; // Enero 2025 tiene 31 días
+  const firstDay = 3; // El 1 de Enero de 2025 cae en Miércoles (3)
+
+  // Obtiene los IDs de las horas reservadas para un día
+  const getReservedHourIds = (day) => {
+    if (!selectedAmenidadId || !monthReservations) return [];
+    const dateKey = formatDayToDate(day);
+    return monthReservations[dateKey] || [];
+  };
+  
+  // Determina si hay al menos una hora libre en el día
+  const isDayAvailable = (day) => {
+    // Si no hay amenidad seleccionada, ningún día es elegible
+    if (!selectedAmenidadId) return false;
+    
+    const reservedHours = getReservedHourIds(day);
+    
+    // Si el número de horas reservadas es menor que el total de horas, hay disponibilidad.
+    return reservedHours.length < ALL_HOURS.length;
+  }
+
+  const handleDayClick = (day) => {
+    // Solo permitir seleccionar si el día está en rango y está disponible
+    if (day > 0 && day <= daysInMonth && isDayAvailable(day)) {
+      setSelectedDate(day);
+    } else {
+      // Si hace clic en un día no disponible, se deselecciona.
+      setSelectedDate(null);
     }
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch("/api/reservas/agregar/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setMensaje("Reserva creada exitosamente");
-                setFormData({
-                    vivienda: "",
-                    fechaReserva: "",
-                    amenidad: "",
-                    horaInicio: ""
-                });
-            }
-            else {
-                setMensaje(`Error: ${data.error}`);
-            }
+  };
+
+  const getDayClass = (day) => {
+    // Días fuera del rango del mes
+    if (day <= 0 || day > daysInMonth) {
+        return "bg-gray-100 cursor-not-allowed";
+    }
+
+    // 1. Días disponibles/agotados (solo aplica si hay una amenidad seleccionada)
+    if (selectedAmenidadId) {
+        if (isDayAvailable(day)) {
+             // Días disponibles
+             if (day === selectedDate) {
+                // Fecha seleccionada
+                return "bg-blue-300 text-[var(--Mi-blanco)] Mi_texto_boton border-blue-500 border-2 shadow-inner";
+             }
+             // Disponible pero no seleccionado
+             return "bg-green-500 text-[var(--Mi-blanco)] cursor-pointer hover:bg-green-600 shadow-md";
+        } else {
+            // Sin espacios disponibles (día completamente lleno)
+            return "bg-gray-300 text-[var(--Mi-cafe-oscuro)] opacity-70 cursor-not-allowed";
         }
-        catch (error) {
-            setMensaje(`Error: ${error.message}`);
+    }
+    
+    // 2. Si NO hay amenidad seleccionada, todos los días son inactivos/neutros
+    return "bg-gray-100 text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed";
+  };
+
+  const days = [];
+  // Espacios en blanco al inicio (días antes del 1)
+  for (let i = 0; i < firstDay; i++) {
+    days.push(<div key={`empty-start-${i}`} className="p-2 text-center"></div>);
+  }
+
+  // Días del mes
+  for (let day = 1; day <= daysInMonth; day++) {
+    days.push(
+      <div
+        key={day}
+        className={`p-2 rounded-full h-8 w-8 flex items-center justify-center Mi_texto_pequeño_16 mx-auto transition-colors ${getDayClass(
+          day
+        )}`}
+        onClick={() => handleDayClick(day)}
+      >
+        {day}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col space-y-4">
+      <div className="flex justify-between items-center px-2">
+        <button
+          className="text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed"
+          disabled
+        >
+          &lt;
+        </button>
+        <span className="Mi_texto_negrita_20 capitalize text-[var(--Mi-cafe-oscuro)]">
+          {monthName}
+        </span>
+        <button
+          className="text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed"
+          disabled
+        >
+          &gt;
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center Mi_texto_pequeño_16 text-[var(--Mi-cafe-oscuro)] font-bold border-b pb-1">
+        {daysOfWeek.map((day) => (
+          <div key={day} className="text-xs text-[var(--Mi-gris)]">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">{days}</div>
+      
+      {/* Mensaje de advertencia si no hay amenidad seleccionada */}
+      {!selectedAmenidadId && (
+          <p className="Mi_texto_pequeño_16 text-red-500 text-center mt-2">
+            *Seleccione una amenidad para ver la disponibilidad de fechas.
+          </p>
+      )}
+    </div>
+  );
+};
+
+// --- COMPONENTE PRINCIPAL ---
+
+export default function AgregarReservaPage() {
+  // --- STATES ---
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedAmenidad, setSelectedAmenidad] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null); 
+  const [selectedTime, setSelectedTime] = useState("");
+  const [userSuggestions, setUserSuggestions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null); // { _id: '...', usuario: '...' }
+  const [amenidadesDisponibles, setAmenidadesDisponibles] = useState([]);
+
+  // Reservas para el mes actual { 'YYYY-MM-DD': ['h10', 'h11'], ... }
+  const [monthReservations, setMonthReservations] = useState({}); 
+
+  // --- FEEDBACK STATES ---
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // --- FETCH AMENIDADES (API Next.js) ---
+  useEffect(() => {
+    const fetchAmenidades = async () => {
+      try {
+        // CORRECCIÓN: Usar el filtro 'reservation' para obtener solo las amenidades reservables
+        const res = await fetch("/api/amenidades?filter=reservation");
+        if (!res.ok) {
+          throw new Error("Error al obtener las amenidades.");
+        }
+        // El backend ahora devuelve directamente el array de amenidades filtradas
+        const data = await res.json();
+        setAmenidadesDisponibles(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching amenidades:", err);
+        setError("No se pudieron cargar las amenidades. Verifique la conexión con el servidor.");
+      }
+    };
+
+    fetchAmenidades();
+  }, []);
+
+  // --- FETCH RESERVATIONS (API Next.js) ---
+  // Se dispara cada vez que cambia la amenidad seleccionada
+  useEffect(() => {
+    if (!selectedAmenidad) {
+        setMonthReservations({});
+        // Limpiar fecha y hora si la amenidad se deselecciona
+        setSelectedDate(null);
+        setSelectedTime("");
+        return;
+    }
+    
+    const fetchReservations = async () => {
+        try {
+            // El backend usa el amenidadId para filtrar las reservas en el mes actual
+            const res = await fetch(`/api/reservas/disponibilidad?amenidadId=${selectedAmenidad}`);
+            
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Error al obtener la disponibilidad de reservas.");
+            }
+            
+            // La respuesta esperada es { 'YYYY-MM-DD': ['h10', 'h11'], ... }
+            const data = await res.json();
+            setMonthReservations(data);
+            setError(null);
+        } catch (err) {
+            console.error("Error fetching reservations:", err);
+            setError(`Error al obtener disponibilidad: ${err.message}`);
+            setMonthReservations({});
         }
     };
-    return (
-        // Formulario para agregar reserva usando los estilos globales de la aplicación
-        <div className="flex flex-col items-center justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
-            <div className="flex items-start justify-center bg-[var(--Mi-fondo)] gap-6 py-10">
-                <div className="flex flex-col gap-6">
-                    <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
-                        <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
-                            <div>
-                                <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Ingrese ID vivienda:
-                                </label>
-                                <input
-                                    type="text"
-                                    name="vivienda"
-                                    value={formData.vivienda}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                        </form>
-                    </div>
-                    <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
-                        <form onSubmit={handleSubmit} className="space-y-4 w-[361px]">
-                            <div>
-                                <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Fecha de Reserva:
-                                </label>
-                                <Calendar
-                                    name="fechaReserva"
-                                    value={formData.fechaReserva}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-6">
-                    <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
-                        <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
-                            <div>
-                                <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Amenidad disponible:
-                                </label>
-                                <input
-                                    type="text"
-                                    name="amenidad"
-                                    value={formData.amenidad}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                        </form>
-                    </div>
-                    <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
-                        <form onSubmit={handleSubmit} className="space-y-4 w-[240px]">
-                            <div>
-                                <label className="Mi_texto_datos_de_contacto block text-[var(--Mi-cafe-oscuro)] mb-1">
-                                    Horarios disponibles:
-                                </label>
-                                <input
-                                    type="text"
-                                    name="horaInicio"
-                                    value={formData.horaInicio}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                        </form>
-                    </div>
-                    <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg w-[400px] flex flex-col items-center">
-                        <p>Nota:
-                            <br />
-                            Las reservas tienen una duracion de una hora.
-                            <br />
-                            Tu usuario no tiene limites de reservas.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <button>
-                    <div
-                        onClick={handleSubmit}
-                        className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-auto px-8 mx-auto block py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border-1 border-[var(--Mi-cafe-oscuro)] cursor-pointer"
-                    >
-                        Agregar Reserva
-                    </div>
-                </button>
-                {mensaje && <p className="mt-4 text-center">{mensaje}</p>}
-            </div>
+    
+    fetchReservations();
+  }, [selectedAmenidad]);
+
+
+  // --- CALCULAR HORARIOS DISPONIBLES (basado en la respuesta de la API) ---
+  const availableHours = useMemo(() => {
+    if (!selectedAmenidad || !selectedDate || !monthReservations) {
+        return [];
+    }
+
+    const targetDate = formatDayToDate(selectedDate);
+    // Obtener los IDs de hora reservados para la fecha
+    const reservedHourIds = monthReservations[targetDate] || [];
+    
+    // Filtrar la lista completa de horarios
+    return ALL_HOURS.filter(hour => !reservedHourIds.includes(hour.id));
+
+  }, [selectedAmenidad, selectedDate, monthReservations]); 
+
+  // --- HANDLERS ---
+  
+  // 1. Buscar usuarios (con debounce - usa el API existente)
+  useEffect(() => {
+    if (searchTerm.length < 2) {
+      setUserSuggestions([]);
+      return;
+    }
+
+    if (selectedUser && searchTerm !== selectedUser.usuario) {
+      setSelectedUser(null);
+      setError(
+        "El texto no coincide con el usuario seleccionado. Por favor, elija de la lista."
+      );
+    } else {
+      setError(null);
+    }
+
+    const timer = setTimeout(async () => {
+      if (!selectedUser || (selectedUser && searchTerm !== selectedUser.usuario)) {
+        try {
+          // Usamos el endpoint API de Next.js para la búsqueda de usuarios
+          const res = await fetch(`/api/usuarios/buscar?term=${searchTerm}`);
+          if (!res.ok) throw new Error("Error en la búsqueda");
+          const data = await res.json();
+          setUserSuggestions(data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, selectedUser]);
+
+  // 2. Manejar selección de usuario
+  const handleUserSelect = (user) => {
+    setSelectedUser(user); 
+    setSearchTerm(user.usuario); 
+    setUserSuggestions([]); 
+    setError(null); 
+  };
+
+  // 3. Manejar cambio de término de búsqueda
+  const handleSearchTermChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    if (newSearchTerm === "") {
+      setSelectedUser(null);
+    }
+  };
+  
+  // 4. Manejar cambio de amenidad
+  const handleAmenidadChange = (e) => {
+    const newAmenidadId = e.target.value;
+    setSelectedAmenidad(newAmenidadId);
+    setSelectedDate(null); // Limpiar fecha para forzar verificación de disponibilidad
+    setSelectedTime(""); // Limpiar horario
+    setError(null); 
+  }
+
+  // Si la fecha seleccionada cambia, se limpia el horario para forzar selección
+  useEffect(() => {
+    setSelectedTime("");
+  }, [selectedDate]);
+
+  // 5. Guardar Reserva (REAL con API Next.js)
+  const handleSave = async () => {
+    setError(null);
+    setShowSuccessMessage(false);
+
+    // Validaciones
+    if (!selectedUser) {
+      setError("Por favor, seleccione un usuario válido de la lista.");
+      return;
+    }
+    if (!selectedAmenidad) {
+      setError("Por favor, seleccione una amenidad.");
+      return;
+    }
+    if (!selectedDate) {
+      setError("Por favor, seleccione una fecha.");
+      return;
+    }
+    if (!selectedTime) {
+      setError("Por favor, seleccione un horario.");
+      return;
+    }
+
+    const reservationDate = formatDayToDate(selectedDate);
+    const selectedHour = ALL_HOURS.find(h => h.id === selectedTime);
+    const selectedHourTime = selectedHour?.time;
+    
+    // Validación final de disponibilidad (doble check)
+    const isAvailableNow = availableHours.some(h => h.id === selectedTime);
+    if (!isAvailableNow) {
+        setError(`El horario de ${selectedHourTime} ya no está disponible. Por favor, seleccione otro.`);
+        return;
+    }
+
+    setIsLoading(true);
+
+    try {
+        const newReservation = {
+            amenidadId: selectedAmenidad,
+            date: reservationDate, // Formato YYYY-MM-DD
+            hourId: selectedTime, // Formato hXX
+            hourTime: selectedHourTime, // Formato HH:MM - HH:MM
+            userId: selectedUser._id, // ID del usuario reservando (Condómino)
+            userName: selectedUser.usuario, // Nombre del usuario reservando
+            // reservedByAdminId se obtiene en el backend desde la sesión/token
+        };
+        
+        const res = await fetch("/api/reservas/agregar", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newReservation),
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+            // Si el backend devuelve un código de error (e.g., 400, 409, 500)
+            throw new Error(data.message || "Error desconocido al guardar la reserva.");
+        }
+
+        // Éxito:
+        setShowSuccessMessage(true);
+        
+        // Limpiar formulario y forzar re-carga de disponibilidad (al limpiar selectedDate
+        setSearchTerm("");
+        setSelectedUser(null);
+        setSelectedDate(null);
+        setSelectedTime("");
+        setSelectedAmenidad("");
+        setMonthReservations({});
+
+    } catch (e) {
+        console.error("Error al guardar la reserva:", e);
+        setError(e.message || "Error al guardar la reserva. Intente de nuevo.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  // 6. Ocultar mensaje de éxito
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => setShowSuccessMessage(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+
+  return (
+    <div className="p-4 md:p-8 max-w-2xl mx-auto">
+      {/* Mensaje de Éxito */}
+      {showSuccessMessage && (
+        <div className="flex items-center justify-center p-4 mb-6 bg-green-100 border border-green-400 text-[var(--Mi-cafe-oscuro)] rounded-lg animate-fade-in">
+          <CheckCircle className="w-6 h-6 mr-3 text-green-700" />
+          <p className="Mi_texto_negrita_20">¡Reserva creada con éxito!</p>
         </div>
-    );
+      )}
+
+      {/* Mensaje de Error */}
+      {error && (
+        <div className="flex items-center justify-center p-4 mb-6 bg-red-100 border border-red-400 text-red-700 rounded-lg animate-fade-in">
+          <AlertCircle className="w-6 h-6 mr-3" />
+          <p className="Mi_texto_negrita_20">{error}</p>
+        </div>
+      )}
+
+      <div className="space-y-6">
+        
+
+        {/* Sección 1: Búsqueda de Usuario (Condómino/Admin) */}
+        <FormCard className="relative z-30">
+          <label
+            htmlFor="userSearch"
+            className="block Mi_texto_negrita_20 mb-2 text-[var(--Mi-cafe-oscuro)]"
+          >
+            Ingrese usuario:*
+          </label>
+          <input
+            id="userSearch"
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchTermChange}
+            placeholder="Escribir..."
+            autoComplete="off"
+            className={`w-full p-3 border rounded-lg focus:ring-1 focus:ring-[var(--Mi-gradiante-azul-from)] focus:border-[var(--Mi-gradiante-azul-from)] Mi_texto_20 text-[var(--Mi-cafe-oscuro)] placeholder-gray-400 ${
+              selectedUser
+                ? "border-green-500 border-2" 
+                : "border-[var(--Mi-cafe-oscuro)]" 
+            }`}
+          />
+
+          {/* Área para sugerencias de autocompletado */}
+          {userSuggestions.length > 0 && (
+            <div className="absolute z-50 w-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+              {userSuggestions.map((user) => (
+                <div
+                  key={user._id}
+                  className="p-3 Mi_texto_pequeño_16 text-[var(--Mi-cafe-oscuro)] hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleUserSelect(user)}
+                >
+                  {user.usuario}
+                </div>
+              ))}
+            </div>
+          )}
+        </FormCard>
+
+        {/* Sección 2: Amenidad Disponible */}
+        <FormCard>
+          <label
+            htmlFor="amenidadSelect"
+            className="block Mi_texto_negrita_20 mb-2 text-[var(--Mi-cafe-oscuro)]"
+          >
+            Seleccione amenidad:*
+          </label>
+          <div className="relative">
+            <select
+              id="amenidadSelect"
+              value={selectedAmenidad}
+              onChange={handleAmenidadChange}
+              className="w-full p-3 border border-[var(--Mi-cafe-oscuro)] rounded-lg focus:ring-1 focus:ring-[var(--Mi-gradiante-azul-from)] focus:border-[var(--Mi-gradiante-azul-from)] Mi_texto_20 appearance-none bg-white pr-8 text-[var(--Mi-cafe-oscuro)]"
+              disabled={amenidadesDisponibles.length === 0}
+            >
+              <option value="" className="text-[var(--Mi-gris)]">
+                {amenidadesDisponibles.length === 0 ? "Cargando..." : `Elegir... (${amenidadesDisponibles.length} disponibles)`}
+              </option>
+              {/* Ahora amenidadesDisponibles solo contiene amenidades filtradas */}
+              {amenidadesDisponibles.map((amenidad) => (
+                <option
+                  key={amenidad._id} 
+                  value={amenidad._id} 
+                  className="text-[var(--Mi-cafe-oscuro)]"
+                >
+                  {amenidad.nombre} 
+                </option>
+              ))}
+            </select>
+            {/* Icono de flecha para la apariencia del select */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--Mi-cafe-oscuro)]">
+              <svg
+                className="fill-current h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l-.707.707L13.586 18l4.293-4.293-.707-.707L13.586 16.586 9.293 12.95z" />
+              </svg>
+            </div>
+          </div>
+        </FormCard>
+
+        {/* Sección 3: Fecha de Reserva (Calendario) y Horarios */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Tarjeta de Calendario */}
+          <FormCard>
+            <label
+              htmlFor="fechaReserva"
+              className="block Mi_texto_negrita_20 mb-2 text-[var(--Mi-cafe-oscuro)]"
+            >
+              Seleccione fecha para la reserva:*
+            </label>
+            <div className="mb-4" />
+
+            <div className="flex flex-col space-y-4">
+              {/* Leyenda */}
+              <div className="Mi_texto_pequeño_16 space-y-2 mb-4 text-[var(--Mi-cafe-oscuro)]">
+                <div className="flex items-center">
+                  <span className="inline-block w-4 h-4 rounded-full bg-green-500 mr-2"></span>
+                  Espacios disponibles
+                </div>
+                <div className="flex items-center">
+                  <span className="inline-block w-4 h-4 rounded-full bg-gray-300 mr-2"></span>
+                  Sin espacios disponibles
+                </div>
+                <div className="flex items-center">
+                  <span className="inline-block w-4 h-4 rounded-full bg-blue-300 mr-2 border-blue-500 border"></span>
+                  Fecha seleccionada
+                </div>
+              </div>
+
+              {/* Calendario (ahora usa los datos de la API) */}
+              <CalendarComponent
+                selectedAmenidadId={selectedAmenidad}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                monthReservations={monthReservations}
+              />
+            </div>
+          </FormCard>
+
+          {/* Tarjeta de Horarios Disponibles */}
+          <FormCard>
+            <label
+              htmlFor="timeSelect"
+              className="block Mi_texto_negrita_20 mb-2 text-[var(--Mi-cafe-oscuro)]"
+            >
+              Horarios disponibles:*
+            </label>
+            <div className="relative">
+              <select
+                id="timeSelect"
+                value={selectedTime}
+                onChange={(e) => {
+                  setSelectedTime(e.target.value);
+                  setError(null); 
+                }}
+                className="w-full p-3 border border-[var(--Mi-cafe-oscuro)] rounded-lg focus:ring-1 focus:ring-[var(--Mi-gradiante-azul-from)] focus:border-[var(--Mi-gradiante-azul-from)] Mi_texto_20 appearance-none bg-white pr-8 text-[var(--Mi-cafe-oscuro)]"
+                disabled={!selectedDate || isLoading || availableHours.length === 0} 
+              >
+                <option value="" className="text-[var(--Mi-gris)]">
+                  {selectedDate ? (availableHours.length > 0 ? "Elegir..." : "No hay horarios disponibles") : "Seleccione una fecha primero"}
+                </option>
+                {availableHours.map((horario) => (
+                    <option
+                      key={horario.id}
+                      value={horario.id}
+                      className="text-[var(--Mi-cafe-oscuro)]"
+                    >
+                      {horario.time}
+                    </option>
+                  ))}
+              </select>
+              {/* Icono de flecha para la apariencia del select */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--Mi-cafe-oscuro)]">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l-.707.707L13.586 18l4.293-4.293-.707-.707L13.586 16.586 9.293 12.95z" />
+              </svg>
+              </div>
+            </div>
+
+            {/* Nota */}
+            <div className="mt-6 p-4 rounded-lg text-[var(--Mi-cafe-oscuro)]">
+              <p className="Mi_texto_negrita_20 mb-1">Nota:</p>
+              <p className="Mi_texto_pequeño_16">
+                Las reservas tienen duración de una hora.
+              </p>
+              <p className="Mi_texto_pequeño_16">
+                Tu usuario no tiene límite de reservas.
+              </p>
+            </div>
+          </FormCard>
+        </div>
+
+        {/* Botón Guardar */}
+        <div className="text-center pt-4">
+          <button
+            onClick={handleSave}
+            disabled={
+              isLoading ||
+              !selectedUser ||
+              !selectedAmenidad ||
+              !selectedDate ||
+              !selectedTime
+            }
+            className={`w-full max-w-fit p-3 rounded-lg Mi_texto_boton text-[var(--Mi-blanco)] shadow-md transition duration-300 ease-in-out ${
+              isLoading ||
+              !selectedUser ||
+              !selectedAmenidad ||
+              !selectedDate ||
+              !selectedTime
+                ? "bg-[var(--Mi-gris)] cursor-not-allowed" 
+                : "bg-mi-gradiente-boton-principal hover:shadow-xl transform hover:scale-[1.03]" 
+            }`}
+          >
+            {isLoading ? "Guardando..." : "Guardar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

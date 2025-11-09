@@ -38,17 +38,13 @@ export default function AgregarAmenidadPage() {
     const actual = amenidades.find((a) => a._id === seleccionada);
 
     if (actual) {
-      // Entrando en modo edición: Cargar datos
       setNombre(actual.nombre);
-      // Corregido: La propiedad de Amenidad ya es una cadena "sí" o "no"
       setRequiereReserva(actual.requiereReserva || "no");
       setTiempoMaximo(actual.tiempoMaximo);
-      // Mostrar imagen existente (asumiendo que 'imagenUrl' es el campo para la URL)
       setPreviewUrl(actual.imagenUrl || null);
-      setImagenFile(null); // Asegurar que no hay archivo nuevo seleccionado al cargar
-      // setMensaje(""); // <-- ELIMINADO: Ya no limpiamos el mensaje aquí para permitir que se muestre el mensaje de éxito después de guardar.
+      setImagenFile(null);
+      // setMensaje("");
     } else {
-      // Saliendo del modo edición (al seleccionar la opción vacía): Limpiar campos
       setNombre("");
       setRequiereReserva("");
       setTiempoMaximo("");

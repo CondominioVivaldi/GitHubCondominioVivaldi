@@ -48,7 +48,6 @@ const CondominoSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     set: function(v) {
-      // Eliminar todos los espacios
       return v.replace(/\s+/g, '');
     },
     validate: {
@@ -64,7 +63,6 @@ const CondominoSchema = new mongoose.Schema({
     required: true,
     trim: true,
     set: function(v) {
-      // Eliminar todos los espacios
       return v.replace(/\s+/g, '');
     }
   },

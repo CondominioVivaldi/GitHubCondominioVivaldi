@@ -10,7 +10,7 @@ const ReclamoSchema = new mongoose.Schema(
       default: "Nuevo",
     },
     creadoPor: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
-    vivienda: { type: mongoose.Schema.Types.ObjectId, ref: "Vivienda" }, // ✅ nuevo campo
+    vivienda: { type: mongoose.Schema.Types.ObjectId, ref: "Vivienda" },
     fechaCreacion: { type: Date, default: Date.now },
     fechaResolucion: { type: Date },
     conversacion: [

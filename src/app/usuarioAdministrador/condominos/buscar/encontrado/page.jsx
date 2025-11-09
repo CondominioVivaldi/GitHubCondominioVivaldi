@@ -60,7 +60,7 @@ export default function CondominoEncontrado() {
             <input
               id="nombreCompleto"
               type="text"
-              placeholder="Bruce Lee"
+              placeholder="Escribir..."
               className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
           </div>
@@ -86,7 +86,7 @@ export default function CondominoEncontrado() {
             <input
               id="correo"
               type="email"
-              placeholder="brucelee@yahoo.com"
+              placeholder="Escribir..."
               className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none focus:ring-2 focus:ring-[var(--Mi-cafe-oscuro)]"
             />
           </div>

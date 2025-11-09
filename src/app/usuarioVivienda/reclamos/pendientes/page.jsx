@@ -55,7 +55,7 @@ export default function ReclamosPendientesUsuario() {
     }
   };
 
-  // 🆕 NUEVO: función para finalizar reclamo
+  // función para finalizar reclamo
 const finalizarReclamo = async () => {
   if (!seleccionado) return;
 
@@ -74,12 +74,11 @@ const finalizarReclamo = async () => {
     const data = await res.json();
 
     if (data.reclamo) {
-      // 🔄 Actualizamos la lista sin mensajes ni alertas
       setReclamos((prev) => prev.filter((r) => r._id !== seleccionado._id));
       setSeleccionado(null);
     }
   } catch (error) {
-    console.error("❌ Error al finalizar reclamo:", error);
+    console.error("Error al finalizar reclamo:", error);
   }
 };
 

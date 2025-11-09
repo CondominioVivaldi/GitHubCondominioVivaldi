@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 // 🔹 GET: Obtener condómino por ID
 export async function GET(req, context) {
   try {
-    // ✅ universal — funciona con params síncronos o asíncronos
+    // universal — funciona con params síncronos o asíncronos
     const { id } = await Promise.resolve(context.params);
 
     await conectarBaseDeDatos();

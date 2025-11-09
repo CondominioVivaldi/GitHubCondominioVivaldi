@@ -169,7 +169,7 @@ export default function VerMisDatos() {
             <input
               id="nombreCompleto"
               type="text"
-              placeholder="Bruce Lee"
+              placeholder="Escribir..."
               value={nombreCompleto}
               readOnly // Deshabilitado
               className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none bg-gray-100 cursor-not-allowed"
@@ -200,7 +200,7 @@ export default function VerMisDatos() {
             <input
               id="correo"
               type="email"
-              placeholder="brucelee@yahoo.com"
+              placeholder="Escribir..."
               value={correo}
               readOnly // Deshabilitado
               className="border border-[var(--Mi-gris)] rounded-lg p-2 sm:p-3 placeholder-[var(--Mi-gris)] focus:outline-none bg-gray-100 cursor-not-allowed"

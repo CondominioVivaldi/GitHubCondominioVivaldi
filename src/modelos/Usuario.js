@@ -11,7 +11,6 @@ const UsuarioSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     set: function(v) {
-      // Eliminar todos los espacios
       return v.replace(/\s+/g, '');
     }
   },
@@ -21,7 +20,6 @@ const UsuarioSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     set: function(v) {
-      // Eliminar todos los espacios
       return v.replace(/\s+/g, '');
     },
     validate: {
