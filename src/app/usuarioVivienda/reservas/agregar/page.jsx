@@ -23,11 +23,11 @@ const ALL_HOURS = generateAllHours();
 
 /**
  * Convierte un número de día (1-31) al formato YYYY-MM-DD para la base de datos.
- * Nota: El Calendario está fijo en Enero 2025.
+ * Nota: El Calendario está fijo en Noviembre 2025.
  */
 const formatDayToDate = (dayNumber) => {
     if (!dayNumber) return null;
-    return `2025-01-${String(dayNumber).padStart(2, '0')}`;
+    return `2025-11-${String(dayNumber).padStart(2, '0')}`;
 }
 
 // Componente para una sección de formulario (tarjeta blanca)

@@ -39,9 +39,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const amenidadId = searchParams.get("amenidadId");
     
-    // El frontend actualmente está codificado para Enero 2025 ('2025-01')
-    const currentYearMonth = "2025-01"; 
-
+    // El frontend actualmente está codificado para noviembre 2025 ('2025-11')
+    const currentYearMonth = "2025-11"; 
     if (!amenidadId) {
       return NextResponse.json({ message: "El ID de la amenidad es obligatorio." }, { status: 400 });
     }
