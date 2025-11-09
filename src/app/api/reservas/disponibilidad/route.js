@@ -32,7 +32,7 @@ export async function GET(request) {
     const authResult = await verificarAutenticacion(token); 
     
     // Se valida que la autenticación sea exitosa (200) y que el usuario sea administrador
-    if (authResult.status !== 200 || authResult.type !== "administrador") {
+    if (authResult.status !== 200 || (authResult.type !== "administrador" && authResult.type !== "vivienda")) {
         return NextResponse.json({ message: "No autorizado o privilegios insuficientes." }, { status: 403 }); 
     }
     
