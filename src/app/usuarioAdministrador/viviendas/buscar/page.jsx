@@ -615,7 +615,7 @@ confirmado = window.confirm("¿Está seguro de que desea eliminar esta vivienda?
                       const simpleVinculos = (
                         viviendaSeleccionada.condominosVinculados || []
                       ).map((v) => ({
-                        condominoId: v.condominoId._id, // Guarda solo el ID
+                        condominoId: v.condominoId._id,
                         tipoInquilino: v.tipoInquilino,
                       }));
                       setCondominosVinculados(simpleVinculos);

@@ -201,7 +201,7 @@ export function MenuAdministrador({ onClose }) {
                 <button
                   key={opcion.titulo}
                   className={`${CLASES_ITEM_BASE} py-0 pl-12 mt-5 rounded-lg justify-start
-                    ${esActiva ? CLASES_ACTIVO : CLASES_HOVER}`} // <-- SOLO el hijo recibe CLASES_ACTIVO
+                    ${esActiva ? CLASES_ACTIVO : CLASES_HOVER}`}
                   
                   onClick={() => navegar(opcion.href)} 
                 >

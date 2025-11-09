@@ -168,7 +168,7 @@ export default function Page() {
     const fechaFin = new Date(fin);
     const hoy = new Date();
 
-    // 🛑 Validaciones
+    // Validaciones
     if (!inicio || !fin) {
       setMensajeError("Por favor selecciona ambas fechas.");
       setReclamos([]);
@@ -188,7 +188,7 @@ export default function Page() {
       return;
     }
 
-    // ✅ Si pasa las validaciones
+    // Si pasa las validaciones
     setMensajeError("");
     const res = await fetch(`/api/reclamos?estado=Finalizado&inicio=${inicio}&fin=${fin}`);
     const data = await res.json();

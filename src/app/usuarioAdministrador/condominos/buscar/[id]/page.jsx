@@ -25,7 +25,7 @@ export default function EditarCondomino() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 📥 Cargar datos del condómino
+  // Cargar datos del condómino
   useEffect(() => {
     async function fetchData() {
       try {
@@ -61,7 +61,7 @@ export default function EditarCondomino() {
     if (id) fetchData();
   }, [id]);
 
-  // 🔍 Validaciones
+  // Validaciones
   const getFormErrors = (data) => {
     const newErrors = {};
     if (!data.tipoDocumento)

@@ -91,7 +91,6 @@ export default function AgregarVivienda() {
     setSubmitMessage("");
 
     try {
-      // 🔍 Verificar primero si el ID ya existe
       const check = await fetch(`/api/viviendas?idVivienda=${idVivienda}`);
       if (check.ok) {
         const exists = await check.json();
@@ -102,7 +101,6 @@ export default function AgregarVivienda() {
         }
       }
 
-      // ✅ Si no existe, crearla
       const response = await fetch("/api/viviendas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

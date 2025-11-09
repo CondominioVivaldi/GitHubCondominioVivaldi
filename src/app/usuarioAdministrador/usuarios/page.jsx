@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 export default function AgregarEliminarUsuarios() {
   const [viviendasVinculadas, setViviendasVinculadas] = useState([]);
-  const [usuariosExistentes, setUsuariosExistentes] = useState([]); // Nuevo estado para usuarios a eliminar
+  const [usuariosExistentes, setUsuariosExistentes] = useState([]);
   const [formDataCrear, setFormDataCrear] = useState({
     viviendaId: "", // ID de MongoDB de la vivienda seleccionada
     viviendaNombre: "", // idVivienda (nombre) de la vivienda

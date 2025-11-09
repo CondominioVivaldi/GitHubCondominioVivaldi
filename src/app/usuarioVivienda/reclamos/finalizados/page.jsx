@@ -12,7 +12,7 @@ function DateRangeSelector({ onBuscar }) {
     if (inicio && fin) {
       onBuscar(inicio, fin);
     }
-  }, [inicio, fin]); // ← 🔥 Ejecuta búsqueda automática
+  }, [inicio, fin]);
 
   return (
     <section className="flex absolute justify-center items-center px-0 pt-3.5 pb-2 bg-white rounded-xl h-[184px] left-[50px] top-[65px] w-[400px] max-md:relative max-md:left-0 max-md:mb-5 max-md:w-full">
@@ -176,7 +176,7 @@ export default function Page() {
       setReclamoSeleccionado(null);
     };
 
-    // 🔍 Validaciones
+    // Validaciones
     if (!inicio || !fin || !usuarioId) {
       limpiarYMostrar("Por favor selecciona ambas fechas.");
       return;
@@ -213,7 +213,6 @@ export default function Page() {
       return;
     }
 
-    // ✅ Si pasa validación
     setMensajeError("");
     setReclamos([]);
     setReclamoSeleccionado(null);

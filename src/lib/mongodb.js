@@ -1,75 +1,87 @@
-// Conexión a MongoDB usando Mongoose
+// src/lib/mongodb.js
+
 import mongoose from "mongoose";
 
-// 'isConnected' sigue aquí por compatibilidad con tu función 'desconectarBaseDeDatos',
-// pero la lógica principal usará 'readyState'.
-let isConnected = false;
+// Constante para la URI (se asume que se define en .env.local)
+const URI = process.env.MONGODB_URI;
 
-export async function conectarBaseDeDatos() {
-  const uri = process.env.MONGODB_URI;
-
-  if (!uri) {
-    console.error("No está definida la variable MONGODB_URI.");
-    throw new Error("No está definida la variable MONGODB_URI.");
-  }
-
-  // --- INICIO DE LA MODIFICACIÓN ---
-  // Revisar el estado de la conexión de Mongoose para prevenir conexiones múltiples
-  // 1 = connected (conectado)
-  // 2 = connecting (conectando)
-
-  // Si ya está conectado (1), salimos.
-  if (mongoose.connection.readyState === 1) {
-    console.log("Ya existe una conexión activa a MongoDB (readyState 1).");
-    isConnected = true; // Sincronizamos tu bandera
-    return;
-  }
-
-  // Si está en proceso de conexión (2), esperamos a que termine
-  // en lugar de intentar conectar de nuevo (esto previene la condición de carrera).
-  if (mongoose.connection.readyState === 2) {
-    console.log("Conexión en progreso (readyState 2)... esperando.");
-    // Esperamos a que el evento 'open' (conexión exitosa) se dispare
-    await new Promise(resolve => mongoose.connection.once('open', () => {
-        console.log("Conexión (en espera) completada.");
-        resolve();
-    }));
-    isConnected = true; // Sincronizamos tu bandera
-    return;
-  }
-  // --- FIN DE LA MODIFICACIÓN ---
-
-  // Si Mongoose está desconectado (0) o desconectándose (3),
-  // procedemos a conectar.
-  try {
-    // Base de datos creada en MongoDB Atlas
-    const db = await mongoose.connect(uri, {
-      dbName: "bdCondominioVivaldi"
-    });
-    
-    isConnected = true;
-    console.log(`Conectado correctamente a MongoDB Atlas`);
-    console.log(`Base de datos: ${db.connection.name}`);
-  } catch (error) {
-    isConnected = false; // Aseguramos que la bandera esté correcta si falla
-    console.error("Error al conectar con MongoDB Atlas:", error);
-    throw error;
-  }
+// --- Implementación del Patrón de Caché Global para Next.js ---
+// Esta es la parte crítica que asegura que la conexión sea un singleton.
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-// Función para desconectar (útil en scripts)
-// Esta función no necesita cambios, ya que depende de tu bandera 'isConnected'.
+// Bandera de estado original (mantenida por compatibilidad con tu sistema)
+let isConnected = false; 
+
+/**
+ * Función para conectar o reutilizar la conexión existente.
+ * @returns {Promise<mongoose.Connection>} La conexión activa a MongoDB.
+ */
+export async function conectarBaseDeDatos() {
+  const uri = URI;
+
+  if (!uri) {
+    console.error("No está definida la variable MONGODB_URI.");
+    throw new Error("No está definida la variable MONGODB_URI.");
+  }
+  
+  // 1. FAST EXIT: Si la conexión ya está en caché o ya existe por Mongoose (readyState 1)
+  if (cached.conn || mongoose.connection.readyState === 1) {
+    cached.conn = cached.conn || mongoose.connection; // Aseguramos que el caché esté lleno
+    console.log("Ya existe una conexión activa a MongoDB (REUTILIZADA).");
+    isConnected = true; 
+    return cached.conn; // Retorna la conexión existente
+  }
+
+  // 2. CREAR/REUTILIZAR PROMESA: Si no hay promesa en caché, la creamos
+  if (!cached.promise) {
+    console.log("Creando nueva promesa de conexión...");
+    
+    const opts = {
+      dbName: "bdCondominioVivaldi",
+      // Otras opciones de configuración pueden ir aquí
+    };
+
+    cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
+      console.log(`Conectado correctamente a MongoDB Atlas`);
+      console.log(`Base de datos: ${mongooseInstance.connection.name}`);
+      return mongooseInstance;
+    });
+  }
+  
+  // 3. ESPERAR PROMESA: Esperamos a que la promesa (nueva o existente) se resuelva.
+  try {
+    cached.conn = await cached.promise;
+    isConnected = true;
+    return cached.conn;
+  } catch (error) {
+    cached.promise = null; 
+    isConnected = false; 
+    console.error("Error al conectar con MongoDB Atlas:", error);
+    throw error;
+  }
+}
+
+// Función para desconectar (mantenida por compatibilidad)
 export async function desconectarBaseDeDatos() {
-  if (!isConnected) {
-    return;
-  }
-  
-  try {
-    await mongoose.disconnect();
-    isConnected = false;
-    console.log("Desconectado de MongoDB Atlas");
-  } catch (error) {
-    console.error("Error al desconectar de MongoDB Atlas:", error);
-    throw error;
-  }
+    // Verifica si la conexión está marcada como activa o si Mongoose lo indica
+    if (!isConnected && mongoose.connection.readyState !== 1) {
+        return;
+    }
+    
+    try {
+        await mongoose.disconnect();
+        // Limpiar el caché solo si la desconexión fue exitosa
+        if (global.mongoose) {
+             global.mongoose.conn = null;
+             global.mongoose.promise = null;
+        }
+        isConnected = false;
+        console.log("Desconectado de MongoDB Atlas");
+    } catch (error) {
+        console.error("Error al desconectar de MongoDB Atlas:", error);
+        throw error;
+    }
 }

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { conectarBaseDeDatos } from "@/lib/mongodb";
 import Vivienda from "@/modelos/Vivienda";
 
-// 📌 Crear nueva vivienda
+// Crear nueva vivienda
 export async function POST(req) {
   try {
     const {
@@ -25,7 +25,7 @@ export async function POST(req) {
 
     await conectarBaseDeDatos();
 
-    // 🔍 Validar que el idVivienda no exista
+    // Validar que el idVivienda no exista
     const viviendaExistente = await Vivienda.findOne({ idVivienda: idVivienda.trim() });
     if (viviendaExistente) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(req) {
       );
     }
 
-    // 🏗️ Crear la nueva vivienda
+    // Crear la nueva vivienda
     const nuevaVivienda = new Vivienda({
       idVivienda: idVivienda.trim(),
       direccion: direccion.trim(),
@@ -56,7 +56,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Error en /api/viviendas (POST):", error);
 
-    // 🧱 Error por índice duplicado en Mongo
+    // Error por índice duplicado en Mongo
     if (error.code === 11000) {
       return NextResponse.json(
         { success: false, message: "Ya existe una vivienda con ese ID." },
@@ -64,7 +64,7 @@ export async function POST(req) {
       );
     }
 
-    // 🧩 Error de validación
+    // Error de validación
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((err) => err.message);
       return NextResponse.json(
@@ -208,7 +208,7 @@ export async function DELETE(req) {
 }
 
 
-// 📋 Obtener viviendas o verificar si un ID ya existe
+// Obtener viviendas o verificar si un ID ya existe
 export async function GET(req) {
   try {
     await conectarBaseDeDatos();
@@ -216,7 +216,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const idVivienda = searchParams.get("idVivienda");
 
-    // 🔍 Si viene idVivienda, verificar existencia
+    // Si viene idVivienda, verificar existencia
     if (idVivienda) {
       const vivienda = await Vivienda.findOne({ idVivienda: idVivienda.trim() })
         .populate("condominosVinculados.condominoId", "nombreCompleto numeroDocumento");
@@ -228,7 +228,7 @@ export async function GET(req) {
       return NextResponse.json({ success: false, message: "No existe una vivienda con ese ID." });
     }
 
-    // 🏘️ Si no se especifica idVivienda, devolver todas las viviendas
+    // Si no se especifica idVivienda, devolver todas las viviendas
     const viviendas = await Vivienda.find({})
       .populate("condominosVinculados.condominoId", "nombreCompleto numeroDocumento")
       .sort({ createdAt: -1 });

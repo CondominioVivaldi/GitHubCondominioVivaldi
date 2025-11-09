@@ -221,7 +221,7 @@ export default function AgregarCondomino() {
               onBlur={handleBlur} // Añadir manejador onBlur
             >
               <option value="" disabled className="text-[var(--Mi-gris)]">
-                Seleccione una opción:
+                Seleccionar...
               </option>
               <option value="DPI" className="text-[var(--Mi-cafe-oscuro)]">
                 DPI
@@ -244,7 +244,7 @@ export default function AgregarCondomino() {
             <input
               id="numeroDocumento"
               type="text"
-              placeholder="0000000000000"
+              placeholder="Escribir..."
               value={numeroDocumento}
               onChange={(e) => setNumeroDocumento(e.target.value)}
               onBlur={handleBlur}
@@ -268,7 +268,7 @@ export default function AgregarCondomino() {
             <input
               id="nombreCompleto"
               type="text"
-              placeholder="Bruce Lee"
+              placeholder="Escribir..."
               value={nombreCompleto}
               onChange={(e) => setNombreCompleto(e.target.value)}
               onBlur={handleBlur}
@@ -317,7 +317,7 @@ export default function AgregarCondomino() {
             <input
               id="correo"
               type="email"
-              placeholder="brucelee@yahoo.com"
+              placeholder="Escribir..."
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
               onBlur={handleBlur}
@@ -337,7 +337,7 @@ export default function AgregarCondomino() {
             <input
               id="telefono"
               type="text"
-              placeholder="00000000"
+              placeholder="Escribir..."
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
               onBlur={handleBlur}

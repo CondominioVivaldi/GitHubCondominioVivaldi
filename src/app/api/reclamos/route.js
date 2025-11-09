@@ -44,7 +44,6 @@ export async function POST(req) {
   }
 
   try {
-    // 👇 Se crea con estado por defecto "Sin leer" (lo define tu modelo)
     const nuevo = await Reclamo.create({ titulo, descripcion, creadoPor });
     return NextResponse.json(
       { message: "Reclamo creado correctamente", reclamo: nuevo },
@@ -59,7 +58,6 @@ export async function POST(req) {
   }
 }
 
-// 👇 Nuevo: actualizar estado de un reclamo
 export async function PUT(req) {
   await conectarBaseDeDatos();
   const body = await req.json();
@@ -82,7 +80,7 @@ export async function PUT(req) {
           ? { conversacion: { autor, mensaje, fecha: new Date() } }
           : {},
       },
-      { new: true } // ✅ devuelve el documento actualizado
+      { new: true }
     )
       .populate("creadoPor", "usuario")
       .populate("vivienda", "numero");

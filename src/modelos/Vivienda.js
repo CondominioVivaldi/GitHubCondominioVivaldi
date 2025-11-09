@@ -11,7 +11,6 @@ const ViviendaSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
     set: function(v) {
-      // Eliminar todos los espacios y convertir a minúsculas
       return v.replace(/\s+/g, '').toLowerCase();
     }
   },
