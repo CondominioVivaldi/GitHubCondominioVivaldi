@@ -157,7 +157,7 @@ export default function VerAmenidad() {
               <button
                 // Asignar la función de navegación al botón
                 onClick={goToReservas}
-                className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-full shadow-md hover:opacity-90 transition-opacity"
+                className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity"
               >
                 Ir a reserva
               </button>

@@ -26,7 +26,7 @@ const ESTRUCTURA_MENU = [
   // Categoría 2
   [
     { 
-      titulo: 'Estados de cuenta🔒', 
+      titulo: 'Estados de cuenta🏹', 
       tipo: 'nav', 
       href: '/usuarioVivienda/estadosDeCuenta' 
     },
@@ -36,9 +36,9 @@ const ESTRUCTURA_MENU = [
       href: '/usuarioVivienda/amenidades' 
     },
     { 
-      titulo: 'Reservas🚧', 
+      titulo: 'Reservas', 
       tipo: 'desplegable', 
-      basePath: '/usuarioVivienda/reservas', // Ruta base para apertura automática
+      basePath: '/usuarioVivienda/reservas',
       opciones: [
         { titulo: "Agregar", href: "/usuarioVivienda/reservas/agregar" },
         { titulo: "Ver activas", href: "/usuarioVivienda/reservas/verActivas" }

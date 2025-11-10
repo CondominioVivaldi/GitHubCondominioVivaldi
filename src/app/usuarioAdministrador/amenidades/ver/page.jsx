@@ -95,7 +95,7 @@ export default function VerAmenidad() {
           <div className="flex items-center justify-center">
             <button
               onClick={() => prevSlide(type)}
-              className="absolute left-0 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow"
+              className="absolute left-0 z-10 bg-white rounded-lg p-3 shadow-lg hover:shadow-xl transition-shadow"
               disabled={items.length <= 1}
             >
               <div className="w-8 h-8 flex items-center justify-center">
@@ -115,7 +115,7 @@ export default function VerAmenidad() {
 
             <button
               onClick={() => nextSlide(type)}
-              className="absolute right-0 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow"
+              className="absolute right-0 z-10 bg-white rounded-lg p-3 shadow-lg hover:shadow-xl transition-shadow"
               disabled={items.length <= 1}
             >
               <div className="w-8 h-8 flex items-center justify-center">
@@ -129,7 +129,7 @@ export default function VerAmenidad() {
               <button
                 key={index}
                 onClick={() => goToSlide(index, type)}
-                className={`w-3 h-3 rounded-full transition-colors ${
+                className={`w-3 h-3 rounded-lg transition-colors ${
                   index === currentIndex
                     ? "bg-[var(--Mi-cafe-oscuro)]"
                     : "bg-gray-300"

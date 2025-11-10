@@ -135,11 +135,6 @@ export default function AgregarEliminarUsuarios() {
       
       if (response.ok) {
         setMensajeCreacion(data.mensaje || "Usuario creado exitosamente.");
-        // Actualizar la lista de usuarios existentes (Problema 3)
-        // Podríamos recargar la lista completa, pero por simplicidad:
-        // const updatedResponse = await fetch("/api/usuarios/ver-usuarios");
-        // const updatedData = await updatedResponse.json();
-        // setUsuariosExistentes(updatedData.usuariosConIdVivienda || []);
       } else {
         setMensajeCreacion(data.mensaje || "Error al crear el usuario.");
       }
@@ -273,7 +268,7 @@ export default function AgregarEliminarUsuarios() {
           
           <button
             type="submit"
-            className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-auto px-8 mx-auto block py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border-1 border-[var(--Mi-cafe-oscuro)]"
+            className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-auto px-8 mx-auto block py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border-1]"
           >
             Crear
           </button>
@@ -311,7 +306,7 @@ export default function AgregarEliminarUsuarios() {
           </div>
           <button
             type="submit"
-            className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-auto px-5 mx-auto block py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border-1 border-[var(--Mi-cafe-oscuro)]"
+            className="bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] Mi_texto_boton w-auto px-5 mx-auto block py-3 rounded-lg hover:opacity-90 transition-opacity duration-300 border-1]"
           >
             Eliminar
           </button>
