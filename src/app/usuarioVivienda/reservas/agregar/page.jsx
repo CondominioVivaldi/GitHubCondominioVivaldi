@@ -1,9 +1,8 @@
 // src/app/usuarioVivienda/reservas/agregar/page.jsx
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 // --- CONSTANTES Y UTILIDADES ---
 
@@ -22,13 +21,18 @@ const generateAllHours = () => {
 const ALL_HOURS = generateAllHours();
 
 /**
- * Convierte un número de día (1-31) al formato YYYY-MM-DD para la base de datos.
- * Nota: El Calendario está fijo en Noviembre 2025.
+ * Formatea un objeto Date a un string 'YYYY-MM-DD'.
+ * @param {Date} date El objeto Date a formatear.
+ * @returns {string} Fecha en formato 'YYYY-MM-DD'.
  */
-const formatDayToDate = (dayNumber) => {
-    if (!dayNumber) return null;
-    return `2025-11-${String(dayNumber).padStart(2, '0')}`;
-}
+const formatDateToYYYYMMDD = (date) => {
+  if (!date) return null;
+  // Usar toISOString y tomar la primera parte (YYYY-MM-DD)
+  // Ajustamos la zona horaria localmente antes de convertir
+  const offset = date.getTimezoneOffset();
+  const adjustedDate = new Date(date.getTime() - (offset*60*1000));
+  return adjustedDate.toISOString().split('T')[0];
+};
 
 // Componente para una sección de formulario (tarjeta blanca)
 const FormCard = ({ children, title, className = "" }) => (
@@ -42,26 +46,55 @@ const FormCard = ({ children, title, className = "" }) => (
   </div>
 );
 
-// --- COMPONENTE DE CALENDARIO ---
+// --- COMPONENTE DE CALENDARIO (MODIFICADO) ---
 
 /**
  * Muestra el calendario con la disponibilidad.
+ * Se hizo dinámico para navegar entre meses y usar la fecha actual.
+ * * @param {object} props 
+ * @param {string} props.selectedAmenidadId - ID de la amenidad seleccionada.
+ * @param {Date | null} props.selectedDate - Objeto Date de la fecha seleccionada.
+ * @param {function} props.setSelectedDate - Setter para la fecha seleccionada.
+ * @param {object} props.monthReservations - Mapa de reservas por fecha: { 'YYYY-MM-DD': ['h10', 'h11'], ... }
+ * @param {Date} props.viewedMonth - El mes/año que se está viendo.
+ * @param {function} props.setViewedMonth - Setter para el mes/año.
+ * @param {function} props.setSelectedTime - Setter para la hora seleccionada.
  */
-const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, monthReservations }) => {
-  const [currentMonth] = useState(new Date(2025, 0)); // Enero 2025 (Fijo por ahora)
+const CalendarComponent = ({ 
+    selectedAmenidadId, 
+    selectedDate, 
+    setSelectedDate, 
+    monthReservations,
+    viewedMonth,
+    setViewedMonth,
+    setSelectedTime // Añadido para limpiar la hora al cambiar de mes
+}) => {
 
   const daysOfWeek = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
-  const monthName = currentMonth.toLocaleString("es-ES", {
+  
+  // Normalizar 'today' para la comparación (ignorar la hora)
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
+
+  const monthName = viewedMonth.toLocaleString("es-ES", {
     month: "long",
     year: "numeric",
   });
-  const daysInMonth = 31; // Enero 2025 tiene 31 días
-  const firstDay = 3; // El 1 de Enero de 2025 cae en Miércoles (3)
 
-  // Obtiene los IDs de las horas reservadas para un día
+  // Cálculo dinámico de los días del mes
+  const year = viewedMonth.getFullYear();
+  const month = viewedMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay(); // 0 (Dom) - 6 (Sáb)
+
+  // Obtiene los IDs de las horas reservadas para un día (número)
   const getReservedHourIds = (day) => {
     if (!selectedAmenidadId || !monthReservations) return [];
-    const dateKey = formatDayToDate(day);
+    // Construir la clave YYYY-MM-DD para el día específico
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return monthReservations[dateKey] || [];
   };
   
@@ -73,8 +106,15 @@ const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, 
   }
 
   const handleDayClick = (day) => {
+    const dayDate = new Date(year, month, day);
+    dayDate.setHours(0, 0, 0, 0);
+
+    // No permitir seleccionar días pasados
+    if (dayDate < today) return;
+
+    // Solo permitir seleccionar si el día está disponible
     if (day > 0 && day <= daysInMonth && isDayAvailable(day)) {
-      setSelectedDate(day);
+      setSelectedDate(dayDate); // Guardar el objeto Date completo
     } else {
       setSelectedDate(null);
     }
@@ -82,28 +122,45 @@ const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, 
 
   const getDayClass = (day) => {
     if (day <= 0 || day > daysInMonth) {
-        return "bg-gray-100 cursor-not-allowed";
+      return "bg-transparent cursor-not-allowed"; // Días fuera del rango (vacíos)
     }
 
+    const dayDate = new Date(year, month, day);
+    dayDate.setHours(0, 0, 0, 0); // Normalizar para comparación
+
+    // 1. Días pasados (Mayor prioridad)
+    if (dayDate < today) {
+      return "bg-gray-100 text-gray-400 cursor-not-allowed opacity-70";
+    }
+
+    // 2. Días futuros o hoy
     if (selectedAmenidadId) {
         if (isDayAvailable(day)) {
-             if (day === selectedDate) {
-                return "bg-blue-300 text-[var(--Mi-blanco)] Mi_texto_boton border-blue-500 border-2 shadow-inner";
-             }
-             return "bg-green-500 text-[var(--Mi-blanco)] cursor-pointer hover:bg-green-600 shadow-md";
+            // Días disponibles
+            // Comprobar si es la fecha seleccionada
+            if (selectedDate && dayDate.getTime() === new Date(selectedDate).setHours(0,0,0,0)) {
+              // Fecha seleccionada
+              return "bg-blue-300 text-[var(--Mi-blanco)] Mi_texto_boton border-blue-500 border-2 shadow-inner";
+            }
+            // Disponible pero no seleccionado
+            return "bg-green-500 text-[var(--Mi-blanco)] cursor-pointer hover:bg-green-600 shadow-md";
         } else {
+            // Sin espacios disponibles (día completamente lleno)
             return "bg-gray-300 text-[var(--Mi-cafe-oscuro)] opacity-70 cursor-not-allowed";
         }
     }
     
+    // 3. Si NO hay amenidad seleccionada (días futuros)
     return "bg-gray-100 text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed";
   };
 
   const days = [];
+  // Espacios en blanco al inicio (días antes del 1)
   for (let i = 0; i < firstDay; i++) {
     days.push(<div key={`empty-start-${i}`} className="p-2 text-center"></div>);
   }
 
+  // Días del mes
   for (let day = 1; day <= daysInMonth; day++) {
     days.push(
       <div
@@ -118,23 +175,46 @@ const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, 
     );
   }
 
+  // Navegación de Mes
+  const goToPreviousMonth = () => {
+    setViewedMonth(new Date(year, month - 1, 1));
+    setSelectedDate(null); // Limpiar selección al cambiar de mes
+    setSelectedTime("");
+  };
+
+  const goToNextMonth = () => {
+    setViewedMonth(new Date(year, month + 1, 1));
+    setSelectedDate(null); // Limpiar selección al cambiar de mes
+    setSelectedTime("");
+  };
+  
+  // No permitir ir a meses pasados
+  const canGoToPreviousMonth = useMemo(() => {
+    const prevMonth = new Date(year, month - 1, 1);
+    const lastDayOfPrevMonth = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
+    lastDayOfPrevMonth.setHours(0,0,0,0);
+    return lastDayOfPrevMonth >= today;
+  }, [year, month, today]);
+
+
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex justify-between items-center px-2">
         <button
-          className="text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed"
-          disabled
+          onClick={goToPreviousMonth}
+          disabled={!canGoToPreviousMonth}
+          className="text-[var(--Mi-cafe-oscuro)] p-1 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          &lt;
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <span className="Mi_texto_negrita_20 capitalize text-[var(--Mi-cafe-oscuro)]">
+        <span className="Mi_texto_negrita_20 capitalize text-[var(--Mi-cafe-oscuro)] w-32 text-center">
           {monthName}
         </span>
         <button
-          className="text-[var(--Mi-cafe-oscuro)] opacity-50 cursor-not-allowed"
-          disabled
+          onClick={goToNextMonth}
+          className="text-[var(--Mi-cafe-oscuro)] p-1 rounded-full hover:bg-gray-200 transition-colors"
         >
-          &gt;
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
@@ -148,6 +228,7 @@ const CalendarComponent = ({ selectedAmenidadId, selectedDate, setSelectedDate, 
 
       <div className="grid grid-cols-7 gap-1">{days}</div>
       
+      {/* Mensaje de advertencia si no hay amenidad seleccionada */}
       {!selectedAmenidadId && (
           <p className="Mi_texto_pequeño_16 text-red-500 text-center mt-2">
             *Seleccione una amenidad para ver la disponibilidad de fechas.
@@ -163,15 +244,17 @@ export default function AgregarReservaViviendaPage() {
   // --- STATES ---
   const [currentUser, setCurrentUser] = useState(null); // Usuario actual logueado
   const [selectedAmenidad, setSelectedAmenidad] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null); 
+  const [selectedDate, setSelectedDate] = useState(null); // Ahora guarda un objeto Date
   const [selectedTime, setSelectedTime] = useState("");
   const [amenidadesDisponibles, setAmenidadesDisponibles] = useState([]);
+  const [viewedMonth, setViewedMonth] = useState(new Date()); // Mes que se está viendo
   const [monthReservations, setMonthReservations] = useState({}); 
 
   // --- FEEDBACK STATES ---
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isFetchingAvailability, setIsFetchingAvailability] = useState(false);
   const [error, setError] = useState(null);
   
   // --- FETCH USUARIO ACTUAL ---
@@ -222,7 +305,7 @@ export default function AgregarReservaViviendaPage() {
     fetchAmenidades();
   }, []);
 
-  // --- FETCH RESERVATIONS ---
+  // --- FETCH RESERVATIONS (Depende de amenidad y mes visto) ---
   useEffect(() => {
     if (!selectedAmenidad) {
         setMonthReservations({});
@@ -232,8 +315,15 @@ export default function AgregarReservaViviendaPage() {
     }
     
     const fetchReservations = async () => {
+        setIsFetchingAvailability(true);
+        setError(null);
+        
+        const year = viewedMonth.getFullYear();
+        const month = viewedMonth.getMonth() + 1; // 1-12
+
         try {
-            const res = await fetch(`/api/reservas/disponibilidad?amenidadId=${selectedAmenidad}`);
+            // Se añaden year y month a la consulta para la API dinámica
+            const res = await fetch(`/api/reservas/disponibilidad?amenidadId=${selectedAmenidad}&year=${year}&month=${month}`);
             
             if (!res.ok) {
                 const errorData = await res.json();
@@ -242,24 +332,27 @@ export default function AgregarReservaViviendaPage() {
             
             const data = await res.json();
             setMonthReservations(data);
-            setError(null);
+
         } catch (err) {
             console.error("Error fetching reservations:", err);
-            setError(`Error al obtener disponibilidad: ${err.message}`);
+            setError(`Error al obtener disponibilidad: ${err.message}.`);
             setMonthReservations({});
+        } finally {
+            setIsFetchingAvailability(false);
         }
     };
     
     fetchReservations();
-  }, [selectedAmenidad]);
+  }, [selectedAmenidad, viewedMonth]); // Depende de la amenidad y del mes visto
+
 
   // --- CALCULAR HORARIOS DISPONIBLES ---
   const availableHours = useMemo(() => {
     if (!selectedAmenidad || !selectedDate || !monthReservations) {
         return [];
     }
-
-    const targetDate = formatDayToDate(selectedDate);
+    // Usar la función de utilidad que formatea el objeto Date
+    const targetDate = formatDateToYYYYMMDD(selectedDate);
     const reservedHourIds = monthReservations[targetDate] || [];
     
     return ALL_HOURS.filter(hour => !reservedHourIds.includes(hour.id));
@@ -272,8 +365,8 @@ export default function AgregarReservaViviendaPage() {
   const handleAmenidadChange = (e) => {
     const newAmenidadId = e.target.value;
     setSelectedAmenidad(newAmenidadId);
-    setSelectedDate(null);
-    setSelectedTime("");
+    setSelectedDate(null); // Limpiar fecha al cambiar amenidad
+    setSelectedTime(""); // Limpiar hora al cambiar amenidad
     setError(null); 
   }
 
@@ -305,7 +398,8 @@ export default function AgregarReservaViviendaPage() {
       return;
     }
 
-    const reservationDate = formatDayToDate(selectedDate);
+    // Usar la función de utilidad para obtener la fecha de reserva
+    const reservationDate = formatDateToYYYYMMDD(selectedDate);
     const selectedHour = ALL_HOURS.find(h => h.id === selectedTime);
     const selectedHourTime = selectedHour?.time;
     
@@ -345,11 +439,13 @@ export default function AgregarReservaViviendaPage() {
         // Éxito
         setShowSuccessMessage(true);
         
-        // Limpiar formulario
+        // Limpiar estado
         setSelectedDate(null);
         setSelectedTime("");
-        setSelectedAmenidad("");
-        setMonthReservations({});
+        
+        // Forzamos la recarga de disponibilidad del mes actual
+        setViewedMonth(new Date(viewedMonth.getTime()));
+
 
     } catch (e) {
         console.error("Error al guardar la reserva:", e);
@@ -479,18 +575,30 @@ export default function AgregarReservaViviendaPage() {
                   Sin espacios disponibles
                 </div>
                 <div className="flex items-center">
+                  <span className="inline-block w-4 h-4 rounded-full bg-gray-100 text-gray-400 border mr-2"></span>
+                  Día pasado (no disponible)
+                </div>
+                <div className="flex items-center">
                   <span className="inline-block w-4 h-4 rounded-full bg-blue-300 mr-2 border-blue-500 border"></span>
                   Fecha seleccionada
                 </div>
               </div>
 
-              {/* Calendario */}
+              {/* Calendario (ahora dinámico) */}
               <CalendarComponent
                 selectedAmenidadId={selectedAmenidad}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 monthReservations={monthReservations}
+                viewedMonth={viewedMonth}
+                setViewedMonth={setViewedMonth}
+                setSelectedTime={setSelectedTime}
               />
+               {isFetchingAvailability && (
+                  <p className="Mi_texto_pequeño_16 text-blue-600 text-center">
+                      Actualizando disponibilidad...
+                  </p>
+              )}
             </div>
           </FormCard>
 
@@ -511,7 +619,7 @@ export default function AgregarReservaViviendaPage() {
                   setError(null); 
                 }}
                 className="w-full p-3 border border-[var(--Mi-cafe-oscuro)] rounded-lg focus:ring-1 focus:ring-[var(--Mi-gradiante-azul-from)] focus:border-[var(--Mi-gradiante-azul-from)] Mi_texto_20 appearance-none bg-white pr-8 text-[var(--Mi-cafe-oscuro)]"
-                disabled={!selectedDate || isLoading || availableHours.length === 0} 
+                disabled={!selectedDate || isLoading || availableHours.length === 0 || isFetchingAvailability} 
               >
                 <option value="" className="text-[var(--Mi-gris)]">
                   {selectedDate ? (availableHours.length > 0 ? "Elegir..." : "No hay horarios disponibles") : "Seleccione una fecha primero"}

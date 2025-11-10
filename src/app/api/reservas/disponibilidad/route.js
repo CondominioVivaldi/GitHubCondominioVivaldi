@@ -13,6 +13,11 @@ export const dynamic = 'force-dynamic';
  * Maneja la obtención de las reservas existentes para una amenidad y mes específico.
  * Retorna un mapa de disponibilidad para el calendario.
  *
+ * Query Params:
+ * - amenidadId: ID de la amenidad (obligatorio)
+ * - year: Año a consultar (ej: 2025)
+ * - month: Mes a consultar (1-12)
+ *
  * @param {Request} request La solicitud Next.js.
  * @returns {NextResponse} Un objeto con las reservas existentes, agrupadas por fecha.
  */
@@ -31,7 +36,7 @@ export async function GET(request) {
     // 3. Verificar autenticación pasando el token string
     const authResult = await verificarAutenticacion(token); 
     
-    // Se valida que la autenticación sea exitosa (200) y que el usuario sea administrador
+    // Se valida que la autenticación sea exitosa (200) y que el usuario sea administrador o vivienda
     if (authResult.status !== 200 || (authResult.type !== "administrador" && authResult.type !== "vivienda")) {
         return NextResponse.json({ message: "No autorizado o privilegios insuficientes." }, { status: 403 }); 
     }
@@ -39,11 +44,31 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const amenidadId = searchParams.get("amenidadId");
     
-    // El frontend actualmente está codificado para noviembre 2025 ('2025-11')
-    const currentYearMonth = "2025-11"; 
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Leer 'year' y 'month' de los parámetros de consulta
+    const yearParam = searchParams.get("year");
+    const monthParam = searchParams.get("month"); // El frontend envía 1-12
+
     if (!amenidadId) {
       return NextResponse.json({ message: "El ID de la amenidad es obligatorio." }, { status: 400 });
     }
+
+    // Si no se proveen, usar el mes y año actual por defecto
+    const now = new Date();
+    const year = parseInt(yearParam) || now.getFullYear();
+    // monthParam es 1-indexado (1-12). getMonth() es 0-indexado (0-11).
+    const month = parseInt(monthParam) || (now.getMonth() + 1);
+
+    // Calcular el primer y último día del mes para la consulta
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    
+    // new Date(year, month, 0) nos da el último día del mes anterior.
+    // Como 'month' es 1-indexado, new Date(year, month, 0) 
+    // nos da el último día del mes 'month' (porque el 2do param es 0-indexado).
+    const lastDayOfMonth = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
+    
+    // --- FIN DE LA CORRECCIÓN ---
 
     await conectarBaseDeDatos();
 
@@ -51,8 +76,8 @@ export async function GET(request) {
     const qReservas = await Reserva.find({
       amenidadId: amenidadId,
       date: {
-        $gte: `${currentYearMonth}-01`, 
-        $lte: `${currentYearMonth}-31`, 
+        $gte: startDate, // Usar fecha de inicio calculada
+        $lte: endDate,   // Usar fecha de fin calculada
       },
     }).select("date hourId -_id")
     .lean(); 

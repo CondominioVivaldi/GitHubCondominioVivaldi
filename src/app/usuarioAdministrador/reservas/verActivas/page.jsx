@@ -212,7 +212,7 @@ export default function ViewReservasPage() {
         {/* Buscar por Fechas */}
         <div className="bg-[var(--Mi-blanco)] p-8 rounded-lg shadow-lg flex-1 flex flex-col items-start">
           <h1 className="Mi_texto_20 text-[var(--Mi-cafe-oscuro)] mb-6">
-            Buscar por Fecha:
+            Buscar por fecha:
           </h1>
           <label className="Mi_texto_pequeño_16 text-[var(--Mi-cafe-oscuro)] mb-1">
             Fecha inicio:
@@ -235,7 +235,7 @@ export default function ViewReservasPage() {
           <button
             onClick={fetchReservas}
             disabled={isLoading}
-            className={`w-full bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] rounded px-4 py-2 Mi_texto_boton transition duration-300 ${
+            className={`w-fit self-center bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] rounded-lg px-4 py-2 Mi_texto_boton transition duration-300 ${
               isLoading
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:opacity-90 hover:shadow-lg"
@@ -262,11 +262,11 @@ export default function ViewReservasPage() {
               className={`flex items-center gap-2 px-4 py-2 rounded Mi_texto_boton transition duration-300 ${
                 selectedReservas.size === 0 || isLoading
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-red-600 text-white hover:bg-red-700 hover:shadow-lg"
+                  : "bg-mi-gradiente-boton-principal text-[var(--Mi-blanco)] hover:opacity-90 hover:shadow-lg rounded-lg"
               }`}
             >
               <Trash2 className="w-5 h-5" />
-              Eliminar Seleccionadas
+              Eliminar
             </button>
           </div>
         )}

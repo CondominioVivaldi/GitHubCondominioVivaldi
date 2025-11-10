@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 
 /**
  * Elimina una o varias reservas.
- * Solo administradores pueden eliminar reservas.
- * 
- * Body:
+ * Administradores pueden eliminar cualquier reserva.
+ * Usuarios de vivienda solo pueden eliminar sus propias reservas.
+ * * Body:
  * - reservaIds: Array de IDs de reservas a eliminar
  */
 export async function DELETE(request) {
@@ -27,12 +27,16 @@ export async function DELETE(request) {
 
     // 2. Verificar autenticación
     const authResult = await verificarAutenticacion(token);
-    if (authResult.status !== 200 || authResult.type !== "administrador") {
+    if (authResult.status !== 200) {
       return NextResponse.json(
-        { message: "No autorizado. Solo administradores pueden eliminar reservas." },
-        { status: 403 }
+        { message: authResult.message || "No autenticado." },
+        { status: authResult.status }
       );
     }
+    
+    // Gracias a la corrección en auth.js, ahora tenemos 'type' y 'usuario' (string)
+    const tipoUsuario = authResult.type;
+    const usuarioSesion = authResult.usuario; // Nombre de usuario del token
 
     // 3. Obtener los IDs de las reservas a eliminar
     const { reservaIds } = await request.json();
@@ -45,15 +49,30 @@ export async function DELETE(request) {
     }
 
     await conectarBaseDeDatos();
-
-    // 4. Eliminar las reservas
-    const resultado = await Reserva.deleteMany({
+    
+    // 4. Determinar el filtro de eliminación
+    let filtroEliminacion = {
       _id: { $in: reservaIds }
-    });
+    };
+
+    if (tipoUsuario === "vivienda") {
+      // SI ES USUARIO VIVIENDA, SÓLO PUEDE ELIMINAR SUS PROPIAS RESERVAS
+      // Añadimos el filtro para asegurar que el 'userName' de la reserva sea el de la sesión
+      filtroEliminacion.userName = usuarioSesion;
+      // Esto previene que un usuario de vivienda elimine una reserva pasando el ID de otro.
+    }
+    // Si es administrador, el filtro queda solo por _id, permitiendo eliminar cualquier reserva.
+
+    // 5. Eliminar las reservas
+    const resultado = await Reserva.deleteMany(filtroEliminacion);
 
     if (resultado.deletedCount === 0) {
+      let message = "No se encontraron reservas con los IDs proporcionados.";
+      if (tipoUsuario === "vivienda") {
+          message = "No se encontraron sus reservas con los IDs proporcionados o no tiene permiso para eliminarlas.";
+      }
       return NextResponse.json(
-        { message: "No se encontraron reservas con los IDs proporcionados." },
+        { message: message },
         { status: 404 }
       );
     }

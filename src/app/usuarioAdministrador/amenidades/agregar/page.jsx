@@ -129,7 +129,7 @@ export default function AgregarAmenidadPage() {
             type="file"
             accept="image/*"
             onChange={handleImagenChange}
-            className="Mi_texto_20 w-full text-[var(--Mi-gris)] file:text-[var(--Mi-gris)] file:font-medium file:border file:border-[var(--Mi-gris)] file:px-4 file:py-2 file:rounded-lg"
+            className="Mi_texto_20 w-full text-[var(--Mi-gris)] file:text-[var(--Mi-cafe-oscuro)] file:font-medium file:border file:border-[var(--Mi-gris)] file:px-4 file:py-2 file:rounded-lg "
             required
           />
           {previewUrl && (

@@ -261,7 +261,7 @@ export default function AgregarAmenidadPage() {
         {/* Imagen */}
         <div className="bg-[var(--Mi-blanco)] rounded-2xl shadow-2xl p-6 sm:p-8">
           <label htmlFor="imagen" className="Mi_texto_20 mb-2 block text-[var(--Mi-cafe-oscuro)]">
-            Reemplazar imagen (Opcional):
+            Reemplazar imagen:
           </label>
           <input
             id="imagen"
